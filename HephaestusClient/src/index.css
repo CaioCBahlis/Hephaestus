@@ -1,0 +1,15 @@
+@import "tailwindcss";
+
+.primary-font {
+    font-family: "Space Grotesk", sans-serif;
+}
+
+
+
+.primary-color {
+    color: #E3803B
+}
+
+.secondary-color{
+    color: #B0A29F
+}
