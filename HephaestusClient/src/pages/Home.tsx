@@ -45,14 +45,14 @@ export default function Home() {
 
             </div>
 
-            <button className="w-[90%] h-[min(70px,10vh)] rounded-md bg-[#F47B25] mt-[min(10px,3vh)] flex justify-center items-center gap-[10px]"> 
+            <a href='/login' className="w-[90%] h-[min(70px,10vh)] rounded-md bg-[#F47B25] mt-[min(10px,3vh)] flex justify-center items-center gap-[10px]"> 
 
                 <span className="primary-font text-white font-medium font-bold"> Chat with Hephaestus </span>
                 <CircleArrowRight color="#FFF"/>
 
-            </button>
+            </a>
 
-            <span className="primary-font mt-1 font-light text-white text-[11px]"> Already have an account? <a href="" className="primary-color"> Log In </a> </span>
+            <span className="primary-font mt-1 font-light text-white text-[11px]"> Already have an account? <a href="/login" className="primary-color"> Log In </a> </span>
 
              
         </div>
