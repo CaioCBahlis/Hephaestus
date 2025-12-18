@@ -10,12 +10,14 @@ export default function Login(){
     return (
         <div className="w-screen h-screen bg-[#1B100E] flex flex-col justify-start items-center">
 
+            <div className='w-[min(100%,600px)] h-screen flex flex-col justify-start items-center'> 
+
                 <div className="w-screen h-[15%] flex justify-center items-center mb-[20px]">
 
                     
-                    <div className="w-[30%] h-[90%] rounded-xl bg-[#F47B25] mt-[max(60px,9vh)] flex justify-center items-center">
+                    <a href="/" className="w-[min(30%,200px)] h-[90%] rounded-xl bg-[#F47B25] mt-[max(60px,9vh)] flex justify-center items-center">
                        <Anvil color='white' size={65} strokeWidth={1}> </Anvil>
-                    </div>
+                    </a>
                 
                 </div>
 
@@ -28,8 +30,7 @@ export default function Login(){
                 </div>
 
                 <LoginBox/> 
-
-               
+            </div>
         </div>
     )
 }
