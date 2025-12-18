@@ -1,9 +1,35 @@
 import {LockKeyhole, Eye, EyeClosed, Mail, CircleArrowRight} from 'lucide-react'
-import {useState} from "react"
+import {useState, useEffect} from "react"
+import { useNavigate } from "react-router";
+import {AccountClient, type LoginPayload } from '../api/AccountClient'
+
+
 
 
 export default function LoginBox(){
+    const [email, setEmail] = useState<string>("")
+    const [password, setPassword] = useState<string>("")
     const [show, setShow] = useState<Boolean>(false)
+    let navigate = useNavigate();
+
+    useEffect(() => {
+        AccountClient.getCSRF()
+    }, [])
+
+    async function handleLogin(Login: LoginPayload) {
+        //TODO: Add Validation On Login
+        
+        const res = await AccountClient.login(Login)
+        
+        if (res.ok){
+            navigate("/chatbot")
+        }
+
+        //Set Session Token
+
+
+        return false
+    }
 
     return (
 
@@ -15,7 +41,7 @@ export default function LoginBox(){
                 <div className="w-full h-[85%] rounded-sm bg-[#372F28] flex items-center pl-3"> 
 
                     <Mail size={20} color="#6D717F"/>
-                    <input type="text" required placeholder='Enter your Email Address' className="w-full h-full pl-3 primary-font text-sm secondary-color"/>
+                    <input value={email} onChange={e => setEmail(e.target.value)} type="text" required placeholder='Enter your Email Address' className="w-full h-full pl-3 primary-font text-sm secondary-color"/>
     
                 </div>
             </div>
@@ -26,7 +52,7 @@ export default function LoginBox(){
                 <div className="w-full h-[min(100%,40vh)] rounded-sm bg-[#372F28] flex items-center pl-3"> 
 
                     <LockKeyhole size={20} color="#6D717F"/>
-                    <input type={show? "text": "password"} required placeholder='Enter your password' className="w-full h-full pl-3 primary-font text-sm secondary-color"/>
+                    <input value={password} onChange={(p) => setPassword(p.target.value)}  type={show? "text": "password"} required placeholder='Enter your password' className="w-full h-full pl-3 primary-font text-sm secondary-color"/>
                     
                     <button className="pr-2" onClick={() => setShow(x => !x)}>
                         {show? <EyeClosed size={20} color="#6D717F"/> : <Eye size={20} color="#6D717F"/>}
@@ -35,7 +61,7 @@ export default function LoginBox(){
                 </div>
             </div>
 
-            <button className="w-full h-[min(100%,40vh)] bg-[#E4813D] mt-[20px] flex justify-center items-center gap-[5px] rounded-sm">
+            <button onClick={() => {handleLogin({email_address:email, password:password})}} className="w-full h-[min(100%,40vh)] bg-[#E4813D] mt-[20px] flex justify-center items-center gap-[5px] rounded-sm">
                 <span className="text-white font-primary text-lg font-bold"> Log In </span>
                 <CircleArrowRight color="#FFF"/>
             </button>
@@ -50,6 +76,7 @@ export default function LoginBox(){
                 <span className="text-black font-primary text-sm"> Continue With Google </span>
                 <CircleArrowRight color="#FFF"/>
             </button>
+
             <span className="text-white primary-font text-[13px]"> New Here? <span className="primary-color"> Create an Account</span>  </span>
 
         </div>
