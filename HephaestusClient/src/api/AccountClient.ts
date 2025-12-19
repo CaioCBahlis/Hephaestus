@@ -19,8 +19,6 @@ export const AccountClient = {
 
     login : async (body: LoginPayload) => {
         
-        
-
        const res = await client.post<LoginResponse>("/accounts/login/", body)
        return res.data
 

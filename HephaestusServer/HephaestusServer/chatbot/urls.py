@@ -3,5 +3,5 @@ from . import views
 #Se Mole doi
 
 urlpatterns = [
-    
+    path("query/", views.PostUserQuery)
 ]
