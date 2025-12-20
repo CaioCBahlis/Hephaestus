@@ -1,3 +1,4 @@
 ./.env
 ./HepheastusClient/.env
 ./HepheastusServer/.env
+./HepheastusServer/HepheastusServer/uploads

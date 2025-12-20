@@ -6,13 +6,16 @@ import type { MessageProps } from '../components/Message'
 
 
 
+const InitialMessage: MessageProps = {
+            Text: "Hello, I'm Hephaestus AI, your personal financial Advisor. How can I help you today?", 
+            UserMessage: false,
+             MessageType: "Text"
+        }
 
 export default function Chatbot(){
-    const [open, setOpen] = useState<Boolean>(false)
-    const [Messages, setMesssages] = useState<MessageProps[]>([])
+    const [Messages, setMesssages] = useState<MessageProps[]>([InitialMessage])
     const [UserQuery, setQuery] = useState<string>("")
     
-
     return (
 
         <div className="w-screen h-screen bg-[#1B100E] flex flex-col justify-arounditems-center">
