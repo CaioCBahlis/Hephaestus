@@ -1,4 +1,4 @@
-./.env
-./HepheastusClient/.env
-./HepheastusServer/.env
-./HepheastusServer/HepheastusServer/uploads
+**/.env
+HephaestusClient/.env
+HephaestusServer/HephaestusServer/.env
+HephaestusServer/HephaestusServer/uploads
