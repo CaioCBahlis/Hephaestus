@@ -77,7 +77,7 @@ export default function LoginBox(){
                 <CircleArrowRight color="#FFF"/>
             </button>
 
-            <span className="text-white primary-font text-[13px]"> New Here? <span className="primary-color"> Create an Account</span>  </span>
+            <a href='/register' className="text-white primary-font text-[13px]"> New Here? <span className="primary-color"> Create an Account</span>  </a>
 
         </div>
 
