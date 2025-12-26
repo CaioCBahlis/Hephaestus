@@ -5,6 +5,7 @@ import { BrowserRouter, Routes, Route } from "react-router";
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Chatbot from './pages/Chatbot';
+import Register from './pages/Register';
 
 createRoot(document.getElementById('root')!).render(
 
@@ -17,7 +18,9 @@ createRoot(document.getElementById('root')!).render(
 
           <Route path="/login" element={<Login/>} />
 
-      </Routes>
+           <Route path="/register" element={<Register/>}/>
+
+           </Routes>
    </BrowserRouter>
     
 
