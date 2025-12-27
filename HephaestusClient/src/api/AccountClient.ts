@@ -6,7 +6,14 @@ export type LoginPayload = {
     password: string
 }
 
-export type LoginResponse = {
+export type RegisterPayload = {
+    Name: string
+    LastName: string
+    Email: string
+    Password: string
+}
+
+export type Response = {
     ok: Boolean
 }
 
@@ -20,7 +27,7 @@ export type Tokens = {
 export const AccountClient = {
 
     getCSRF: async () => {
-        const token = await client.get<LoginResponse>("/accounts/csrf/")
+        const token = await client.get<Response>("/accounts/csrf/")
         return token
     },
 
@@ -29,6 +36,11 @@ export const AccountClient = {
        const res = await client.post<Tokens>("/accounts/token/", body)
        return res
 
+    },
+
+    register: async (body: RegisterPayload) => {
+        const res = await client.post<Response>("/accounts/create_account/", body)
+        return res.data
     }
 
 

@@ -25,9 +25,9 @@ export default function Register(){
 
                 <div className="w-screen h-[20%] flex flex-col items-center justify-center gap-[15px]"> 
 
-                    <h1 className="primary-font text-white text-3xl"> Forge your <span className="primary-color"> future </span>   </h1>
+                    <h1 className="primary-font text-white text-3xl"> Start your <span className="primary-color"> Journey </span>   </h1>
 
-                    <p className="w-[65%] text-center primary-font text-sm secondary-color"> Chat with Hephaestus AI and redefine what's possible </p>
+                    <p className="w-[65%] text-center primary-font text-sm secondary-color"> Create an account and start chatting with Hephaestus right away! </p>
 
                 </div>
 

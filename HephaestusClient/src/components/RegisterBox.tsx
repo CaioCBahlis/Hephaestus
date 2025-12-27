@@ -10,6 +10,8 @@ export default function RegisterBox(){
     const [Name, setName] = useState("")
     const [LastName, setLastName] = useState("")
     const [Email, setEmail] = useState("")
+    const [Password, setPassword] = useState("")
+    const [ConfirmPassword, setConfirmPassword] = useState("")
     const [PasswordShow, setPasswordShow] = useState(false)
     const [ConfirmShow, setConfirmShow] = useState(false)
     let navigate = useNavigate();
@@ -80,17 +82,16 @@ export default function RegisterBox(){
 
     return (
        
-        <div className="w-[92%] flex flex-col justify-start items-center gap-4 mt-[5px]">
+        <div className="w-[92%] h-[65%] flex flex-col justify-start items-center gap-4 mt-[5px]">
             
-            <div className="w-full flex flex-row justify-between items-center gap-4"> 
+            <div className="w-full h-[min(80px,20vh)] min-h-[40px] flex flex-row justify-between items-center gap-4"> 
 
                 <div className="w-[47%] h-full flex flex-col"> 
-
                     <span className="primary-font text-white font-bold"> First Name </span>
-                    <div className="w-full min-h-[40px] h-[40px] rounded-sm bg-[#372F28] flex items-center pl-3"> 
+                    <div className="w-full h-full min-h-[40px] rounded-sm bg-[#372F28] flex items-center pl-3"> 
 
                         <User size={20} color="#6D717F"/>
-                        <input type="text" required placeholder='John' className="w-full h-full pl-3 primary-font text-sm secondary-color"/>
+                        <input value={Name} onChange={e => setName(e.currentTarget.value)} type="text" required placeholder='John' className="w-full h-full pl-3 primary-font text-sm secondary-color"/>
         
                     </div>
 
@@ -99,37 +100,37 @@ export default function RegisterBox(){
                 <div className="w-[47%] h-full flex flex-col"> 
 
                     <span className="primary-font text-white font-bold"> Last Name </span>
-                    <div className="w-full min-h-[40px] max-h-[80px] rounded-sm bg-[#372F28] flex items-center pl-3"> 
+                    <div className="w-full min-h-[40px] h-full rounded-sm bg-[#372F28] flex items-center pl-3"> 
 
                         <FileUser size={20} color="#6D717F"/>
-                        <input type="text" required placeholder='Doe' className="w-full h-full pl-3 primary-font text-sm secondary-color"/>
+                        <input value={LastName} onChange={e => setLastName(e.currentTarget.value)} type="text" required placeholder='Doe' className="w-full h-full pl-3 primary-font text-sm secondary-color"/>
         
                     </div>
                 </div>
 
             </div>
 
-            <div className="w-full flex flex-col justify-center items-start"> 
+            <div className="w-full h-[min(80px,20vh)] flex flex-col justify-center items-start"> 
 
                 <span className="primary-font text-white font-bold"> Email Address </span>
-                <div className="w-full min-h-[40px] rounded-sm bg-[#372F28] flex items-center pl-3"> 
+                <div className="w-full h-full min-h-[40px] rounded-sm bg-[#372F28] flex items-center pl-3"> 
 
                     <Mail size={20} color="#6D717F"/>
-                    <input type="text" required placeholder='youremail@example.com' className="w-full h-full pl-3 primary-font text-sm secondary-color"/>
+                    <input value={Email} onChange={e => setEmail(e.currentTarget.value)} type="text" required placeholder='youremail@example.com' className="w-full h-full pl-3 primary-font text-sm secondary-color"/>
 
                 </div>
 
             </div>
 
-            <div className="w-full  flex flex-col justify-around items-center gap-[7px]"> 
+            <div className="w-full h-[min(160px,40vh)] flex flex-col justify-around items-center gap-[7px]"> 
 
                 <div className="w-full h-full flex flex-col"> 
 
                     <span className="primary-font text-white font-bold"> Password </span>
-                    <div className="w-full min-h-[40px] rounded-sm bg-[#372F28] flex items-center pl-3"> 
+                    <div className="w-full h-full min-h-[40px] rounded-sm bg-[#372F28] flex items-center pl-3"> 
 
                         <LockKeyhole size={20} color="#6D717F"/>
-                        <input type={PasswordShow? "password" : "text"} required placeholder='Enter your password' className="w-full h-full pl-3 primary-font text-sm secondary-color"/>
+                        <input value={Password} onChange={e => setPassword(e.currentTarget.value)} type={PasswordShow? "text" : "password"} required placeholder='Enter your password' className="w-full h-full pl-3 primary-font text-sm secondary-color"/>
                         <button className="pr-2" onClick={() => setPasswordShow(x => !x)}>
                             {PasswordShow? <EyeClosed size={20} color="#6D717F"/> : <Eye size={20} color="#6D717F"/>}
                         </button>
@@ -141,10 +142,10 @@ export default function RegisterBox(){
                 <div className="w-full h-full flex flex-col"> 
 
                     <span className="primary-font text-white font-bold"> Confirm your password </span>
-                    <div className="w-full min-h-[40px] rounded-sm bg-[#372F28] flex items-center pl-3"> 
+                    <div className="w-full h-full min-h-[40px] rounded-sm bg-[#372F28] flex items-center pl-3"> 
 
                         <LockKeyhole size={20} color="#6D717F"/>
-                        <input type={ConfirmShow? "password": "text"} required placeholder='Confirm your password' className="w-full h-full pl-3 primary-font text-sm secondary-color"/>
+                        <input value={ConfirmPassword} onChange={e => setConfirmPassword(e.currentTarget.value)}  type={ConfirmShow? "text": "password"} required placeholder='Confirm your password' className="w-full h-full pl-3 primary-font text-sm secondary-color"/>
                         <button className="pr-2" onClick={() => setConfirmShow(x => !x)}>
                             {ConfirmShow? <EyeClosed size={20} color="#6D717F"/> : <Eye size={20} color="#6D717F"/>}
                         </button>
@@ -154,10 +155,11 @@ export default function RegisterBox(){
 
             </div>
 
-            <button className="w-full min-h-[60px] bg-[#E4813D] ] flex justify-center items-center gap-[5px] rounded-sm">
-                    <span className="text-white font-primary text-lg font-bold"> Log In </span>
+            <button onClick={e => handleSubmit(e)} className="w-full min-h-[60px] bg-[#E4813D] flex justify-center items-center gap-[5px] mt-[10px] rounded-sm">
+                    <span className="text-white font-primary text-lg font-bold"> Register </span>
                     <CircleArrowRight color="#FFF"/>
             </button>
+
 
              <div className="w-full h-[5px] flex justify-between items-center mt-[20px]">
                     <hr className="w-[27%] h-[2px] bg-white"/>
@@ -165,7 +167,7 @@ export default function RegisterBox(){
                     <hr className="w-[27%] h-[2px] bg-white"/>
             </div>
 
-            <div className="w-[40px] min-h-[40px] bg-white rounded-[100%] primary-font flex justify-center items-center mb-[10px]">  
+            <div className="w-[40px] min-h-[40px] bg-white rounded-[100%] primary-font flex justify-center items-center mt-[10px] mb-[10px]">  
 
                  <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" className="block w-[60%] h-[60%]">
                         <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path>
