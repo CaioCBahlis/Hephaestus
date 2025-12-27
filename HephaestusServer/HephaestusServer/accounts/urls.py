@@ -4,4 +4,5 @@ from . import views
 urlpatterns = [
     path("login/", views.LogIn),
     path("csrf/", views.GetCSRF),
+    path("create_account/", views.Register),
 ]
