@@ -1,7 +1,7 @@
 import { CircleArrowRight, Eye, EyeClosed, LockKeyhole, Lock, Mail, FileUser, User } from "lucide-react"
 import { useState, type FormEvent } from "react"
 import { toast } from "react-toastify"
-import {AccountClient, type RegisterPayload} from '../api/AccountClient'
+import {AccountClient, type LoginPayload, type RegisterPayload} from '../api/AccountClient'
 import { useNavigate } from "react-router"
 
 
@@ -36,9 +36,17 @@ export default function RegisterBox(){
             Password: Password
         }
 
+        const TokenPayload: LoginPayload = {
+            email: Email,
+            password: Password,
+        }
+
         const res = await AccountClient.register(payload)
 
         if (res.ok){
+            const token = await AccountClient.GetToken(TokenPayload)
+            console.log(token)
+
             navigate("/chatbot")
         }
         
@@ -170,7 +178,7 @@ export default function RegisterBox(){
                     </svg>
             </div>
            
-            <a href='/register' className="text-white primary-font text-[13px] mb-[5px]"> Already have an Account? <span className="primary-color"> Login </span>  </a>
+            <a href='/login' className="text-white primary-font text-[13px] mb-[5px]"> Already have an Account? <span className="primary-color"> Login </span>  </a>
 
         </div>
     )
