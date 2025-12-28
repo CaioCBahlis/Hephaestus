@@ -2,13 +2,20 @@ import {client} from "./client.ts"
 
 
 export type LoginPayload = {
-    email_address: string
+    email: string
     password: string
 }
 
 export type LoginResponse = {
     ok: Boolean
 }
+
+export type Tokens = {
+    refresh: string
+    access: string
+}
+
+
 
 export const AccountClient = {
 
@@ -17,10 +24,12 @@ export const AccountClient = {
         return token
     },
 
-    login : async (body: LoginPayload) => {
+    GetToken : async (body: LoginPayload) => {
         
-       const res = await client.post<LoginResponse>("/accounts/login/", body)
-       return res.data
+       const res = await client.post<Tokens>("/accounts/token/", body)
+       return res
 
     }
+
+
 }

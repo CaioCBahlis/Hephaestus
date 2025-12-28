@@ -1,7 +1,7 @@
 import {LockKeyhole, Eye, EyeClosed, Mail, CircleArrowRight} from 'lucide-react'
 import {useState, useEffect} from "react"
 import { useNavigate } from "react-router";
-import {AccountClient, type LoginPayload } from '../api/AccountClient'
+import {AccountClient, type LoginPayload, type Tokens } from '../api/AccountClient'
 
 
 
@@ -19,13 +19,19 @@ export default function LoginBox(){
     async function handleLogin(Login: LoginPayload) {
         //TODO: Add Validation On Login
         
-        const res = await AccountClient.login(Login)
-        
-        if (res.ok){
+        const res = await AccountClient.GetToken(Login)
+ 
+       
+        if (res.status){
+
+            console.log(res.data.access, res.data.refresh)
+            localStorage.setItem("AccessToken", res.data.access)
+            localStorage.setItem("RefreshToken", res.data.refresh)
+            
             navigate("/chatbot")
         }
 
-        //Set Session Token
+        
 
 
         return false
@@ -61,7 +67,7 @@ export default function LoginBox(){
                 </div>
             </div>
 
-            <button onClick={() => {handleLogin({email_address:email, password:password})}} className="w-full h-[min(100%,40vh)] bg-[#E4813D] mt-[20px] flex justify-center items-center gap-[5px] rounded-sm">
+            <button onClick={() => {handleLogin({email:email, password:password})}} className="w-full h-[min(100%,40vh)] bg-[#E4813D] mt-[20px] flex justify-center items-center gap-[5px] rounded-sm">
                 <span className="text-white font-primary text-lg font-bold"> Log In </span>
                 <CircleArrowRight color="#FFF"/>
             </button>

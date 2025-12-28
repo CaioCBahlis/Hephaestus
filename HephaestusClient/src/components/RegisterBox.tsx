@@ -1,5 +1,8 @@
 import { CircleArrowRight, Eye, EyeClosed, LockKeyhole, Lock, Mail, FileUser, User } from "lucide-react"
-import { useState } from "react"
+import { useState, type FormEvent } from "react"
+import { toast } from "react-toastify"
+import {AccountClient, type LoginPayload, type RegisterPayload} from '../api/AccountClient'
+import { useNavigate } from "react-router"
 
 
 
@@ -9,6 +12,69 @@ export default function RegisterBox(){
     const [Email, setEmail] = useState("")
     const [PasswordShow, setPasswordShow] = useState(false)
     const [ConfirmShow, setConfirmShow] = useState(false)
+    let navigate = useNavigate();
+
+
+    async function handleSubmit(e: React.FormEvent<HTMLButtonElement>){
+        e.preventDefault()
+
+        if (!VerifyEmail(Email)){
+            setEmail("")
+            return
+        }
+
+        if (!VerifyPassword(Password, ConfirmPassword)){
+            return
+        }
+
+        const payload: RegisterPayload = {
+            Name: Name,
+            LastName: LastName,
+            Email: Email,
+            Password: Password
+        }
+
+        const TokenPayload: LoginPayload = {
+            email: Email,
+            password: Password,
+        }
+
+        const res = await AccountClient.register(payload)
+
+        if (res.ok){
+            const token = await AccountClient.GetToken(TokenPayload)
+            console.log(token)
+
+            navigate("/chatbot")
+        }
+        
+    }
+
+    function VerifyEmail(Email: string): Boolean{
+
+        const EmailRegex: RegExp = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        const IsValid: boolean = EmailRegex.test(Email)
+        if (!IsValid){
+            toast.error("Email Format is Invalid")
+            return false
+        }
+        return true
+    }
+
+    function VerifyPassword(Password: string, ConfirmPassword: string){
+
+        if (Password !== ConfirmPassword){
+            toast.error("Both Passwords must match")
+            return false
+        }
+
+        if (Password.length <= 7){
+            toast.error("Both Passwords must be at least 8 characters in length")
+            return false
+        }    
+
+        return true
+    }
     
 
 
@@ -109,8 +175,8 @@ export default function RegisterBox(){
                         <path fill="none" d="M0 0h48v48H0z"></path>
                     </svg>
             </div>
-
            
+            <a href='/login' className="text-white primary-font text-[13px] mb-[5px]"> Already have an Account? <span className="primary-color"> Login </span>  </a>
 
         </div>
     )
