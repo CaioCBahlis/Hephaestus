@@ -6,6 +6,6 @@ from . import views
 
 # TODO: change name to more descriptive
 urlpatterns = [
-    path("query/", views.PostUserQuery),
+    path("query/", views.post_user_query), # POST
     path("file_upload/", views.PostUserFiles)
 ]

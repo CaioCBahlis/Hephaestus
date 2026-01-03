@@ -1,3 +1,4 @@
 django
 google-generativeai
 django-cors-headers
+dotenv
