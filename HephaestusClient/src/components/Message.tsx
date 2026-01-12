@@ -10,6 +10,7 @@ export type MessageProps = {
     File?: File | undefined
 }
 
+
 export default function Message(props: {Message: MessageProps}){
 
     return (

@@ -1,20 +1,82 @@
 import {Anvil, Menu} from 'lucide-react'
-import {useState} from "react"
+import {useEffect, useState} from "react"
 import Chat from '../components/Chat'
 import ChatUserInput from '../components/ChatUserInput'
 import type { MessageProps } from '../components/Message'
+import { ChatbotClient } from '../api/ChatbotClient'
 
 
 
 const InitialMessage: MessageProps = {
             Text: "Hello, I'm Hephaestus AI, your personal financial Advisor. How can I help you today?", 
             UserMessage: false,
-             MessageType: "Text"
+            MessageType: "Text"
         }
 
+export type ChatHistory = {
+    ChatContext: MessageProps[]
+}
+
+
+
+
 export default function Chatbot(){
-    const [Messages, setMesssages] = useState<MessageProps[]>([InitialMessage])
+    const [Messages, setMessages] = useState<MessageProps[]>([InitialMessage])
     const [UserQuery, setQuery] = useState<string>("")
+    const [File, SetFiles] = useState<File | null>(null)
+
+     async function handleSubmit(NewMessage: MessageProps){
+        
+        setMessages(x => [...x, NewMessage])
+        
+        let reply;
+        if (NewMessage.MessageType === "File"){
+            reply = await ChatbotClient.PostUserFiles({File: File!, UserMessage: true})
+        }else{
+            reply = await ChatbotClient.PostUserQuery({ChatContext: [...Messages, NewMessage]}) //React Will only update messages next tick, do it manually instead
+        }
+
+        let BotResponse: MessageProps = {
+            Text: "",
+            UserMessage: false,
+            MessageType: "Text"
+        }
+
+
+        if (!reply.ok) {
+            BotResponse.Text = "An error occurred. Please try again later."
+        } else {
+            BotResponse.Text = reply.data["reply"]
+        }
+
+        setMessages(x => [...Messages, NewMessage, BotResponse])
+
+        setQuery("")
+        SetFiles(null)
+    }
+
+    useEffect(() => {
+        if (UserQuery === "" && File === null){ //Prevents Sending Messages on Mount
+            return
+        }
+
+        //TODO: Support Message and File
+        //Right now, it either sends a File or a Message
+        // Because of this if statement, and also because they have different endpoints
+        //In the future, merge both endpoints to one to support Files with Messages
+        let NewMessage: MessageProps;
+        if (File != null){
+        
+            NewMessage = {Text: "" , UserMessage: true, MessageType: "File", File: File}
+        }else{
+            NewMessage = {Text: UserQuery , UserMessage: true, MessageType: "Text"}
+        }
+
+        handleSubmit(NewMessage)
+
+    }, [UserQuery, File])
+
+    
     
     return (
 
@@ -48,7 +110,7 @@ export default function Chatbot(){
 
             <Chat Messages={Messages}/> 
 
-            <ChatUserInput UserQuery={UserQuery} SetQuery={setQuery} SetMessages={setMesssages}/> 
+            <ChatUserInput SetQuery={setQuery} SetFiles={SetFiles} /> 
 
         </div>
     )
