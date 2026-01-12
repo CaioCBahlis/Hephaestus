@@ -2,3 +2,5 @@
 HephaestusClient/.env
 HephaestusServer/HephaestusServer/.env
 HephaestusServer/HephaestusServer/uploads
+__pycache__/
+*.pyc
