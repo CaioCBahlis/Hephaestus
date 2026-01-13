@@ -82,8 +82,7 @@ export const ChatbotClient =  {
         try{
 
             const Token = localStorage.getItem("AccessToken")
-
-            const res = await client.get("chatbot/get_session_id/", {
+            const res = await client.get(`chatbot/get_session_id/`, {
                     withCredentials: true, 
                     headers: { Authorization: `Bearer ${Token}`, "Content-Type": "multipart/form-data" }
             })
@@ -92,6 +91,24 @@ export const ChatbotClient =  {
         }catch (err: any){
 
             console.log("Failed to Fetch Session Id")
+            return {ok:false, status: err.response?.status, data: err}
+        }
+    },
+
+    GetSessionContext: async (SessionId: string) => {
+        try{
+
+            const Token = localStorage.getItem("AccessToken")
+
+            const res = await client.get(`chatbot/get_session_context/${SessionId}`, {
+                    withCredentials: true, 
+                    headers: { Authorization: `Bearer ${Token}`, "Content-Type": "multipart/form-data" }
+            })
+            return {ok: true, status: res.status, data: res.data["messages"]}
+
+        }catch (err: any){
+
+            console.log("Failed to Fetch Session Context")
             return {ok:false, status: err.response?.status, data: err}
         }
     }

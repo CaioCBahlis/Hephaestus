@@ -36,6 +36,7 @@ def post_user_query(request, session_id) -> JsonResponse:
         ConvSession.messages = conversation_history
         ConvSession.save()
 
+
         GeminiPayload = ParseToGemini(conversation_history) #Model Agnostic, change parsing based on Model
 
 
@@ -43,6 +44,13 @@ def post_user_query(request, session_id) -> JsonResponse:
         bot_response = model.generate_content(GeminiPayload)
         bot_message = bot_response.candidates[0].content.parts[0].text
 
+
+        Bot_Reply_Json = {"Text": bot_message, "MessageType": "Text", "UserMessage": False}
+        
+
+        ConvSession.messages.append(Bot_Reply_Json)
+        ConvSession.save()
+        
         if not bot_message:
             print(f"Error sending message, got: No bot response")
             return JsonResponse({"error": "No bot response"}, status=500)
@@ -91,5 +99,24 @@ def PostUserFiles(request, session_id):
 def get_session_id(request):
     UserId = request.user.id
 
-    NewSession = Conversations.objects.create(name="undefined", messages="{}", user_id=request.user)
+    NewSession = Conversations.objects.create(name="undefined", messages=[{"Text": "Hello, I'm Hephaestus AI, your personal financial Advisor. How can I help you today?", "MessageType": "Text", "UserMessage": False}], user_id=request.user)
     return JsonResponse({"SessionId": NewSession.id}, status=201) #Created Status
+
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def get_user_sessions(request):
+    UserId = request.user.id
+
+    UserConversations = Conversations.objects.get(user_id_id=UserId)
+
+    print(UserConversations)
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def get_session_context(request, session_id):
+
+    UserId = request.user.id
+    UserConversations = Conversations.objects.get(id=session_id, user_id_id=request.user)
+    return JsonResponse({"messages": UserConversations.messages}, status=200)

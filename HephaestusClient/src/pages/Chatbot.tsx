@@ -32,7 +32,22 @@ export default function Chatbot(){
 
     useEffect(() => {
 
-        if (sessionId) return
+        if (sessionId) {
+
+            const res = ChatbotClient.GetSessionContext(sessionId)
+            res.then(x => {
+                if (!x.ok){
+                    throw new Error("Failed to Get Session Context")
+                
+                }
+
+                console.log(x.data)
+                setMessages(x.data)
+            })
+
+
+            return
+        }
 
         ChatbotClient.GetSessionId().then(x => {
             if (x.status !== 201) {
