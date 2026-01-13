@@ -5,3 +5,4 @@ dotenv
 psycopg
 djangorestframework 
 djangorestframework-simplejwt
+

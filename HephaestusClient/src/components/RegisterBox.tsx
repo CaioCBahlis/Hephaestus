@@ -1,8 +1,9 @@
-import { CircleArrowRight, Eye, EyeClosed, LockKeyhole, Lock, Mail, FileUser, User } from "lucide-react"
-import { useState, type FormEvent } from "react"
+import { CircleArrowRight, Eye, EyeClosed, LockKeyhole, Mail, FileUser, User } from "lucide-react"
+import { useState } from "react"
 import { toast } from "react-toastify"
 import {AccountClient, type LoginPayload, type RegisterPayload} from '../api/AccountClient'
 import { useNavigate } from "react-router"
+import { useUser } from "./UserContextProvider"
 
 
 
@@ -15,6 +16,8 @@ export default function RegisterBox(){
     const [PasswordShow, setPasswordShow] = useState(false)
     const [ConfirmShow, setConfirmShow] = useState(false)
     let navigate = useNavigate();
+
+    const {setUser} = useUser()
 
 
     async function handleSubmit(e: React.FormEvent<HTMLButtonElement>){
@@ -46,7 +49,7 @@ export default function RegisterBox(){
         if (res.ok){
             const token = await AccountClient.GetToken(TokenPayload)
             console.log(token)
-
+            setUser({email: Email})
             navigate("/chatbot")
         }
         

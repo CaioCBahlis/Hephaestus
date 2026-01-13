@@ -4,6 +4,9 @@ import Chat from '../components/Chat'
 import ChatUserInput from '../components/ChatUserInput'
 import type { MessageProps } from '../components/Message'
 import { ChatbotClient } from '../api/ChatbotClient'
+import { useUser } from '../components/UserContextProvider'
+import { Navigate } from 'react-router'
+
 
 
 
@@ -24,9 +27,16 @@ export default function Chatbot(){
     const [Messages, setMessages] = useState<MessageProps[]>([InitialMessage])
     const [UserQuery, setQuery] = useState<string>("")
     const [File, SetFiles] = useState<File | null>(null)
+    const [IsMenuOpen, setMenuOpen] = useState<boolean>(false)
 
-     async function handleSubmit(NewMessage: MessageProps){
-        
+    const { user, loading } = useUser()
+
+    if (!user) return <Navigate to="/login" replace />
+
+
+    async function handleSubmit(NewMessage: MessageProps){
+
+     
         setMessages(x => [...x, NewMessage])
         
         let reply;
@@ -84,7 +94,7 @@ export default function Chatbot(){
 
             <div className="w-screen h-[10vh] bg-[#201810] flex justify-between items-center">
 
-                    <div className='w-[50%] h-full flex justify-around items-center ml-3'>
+                    <div className='w-[50%] h-full flex justify-center gap-[10px] items-center ml-3'>
 
                         <div className="relative p-2 border-1 border-[#3E1B12] rounded-[50%]">
                             <Anvil size={25} color='#F47B25'/> 
@@ -101,10 +111,16 @@ export default function Chatbot(){
 
                     </div>
 
-                    <div className="mr-3 flex justify-center items-center">
-                        <Menu color='#F47B25'/>
+                    <button className="relative w-[20px] h-[20px] right-[35px] flex justify-center items-center flex flex-col"
+                    onClick={() => {
+                        setMenuOpen(x => !x)
+                    }}>
 
-                    </div>
+                        <div className={`absolute ${IsMenuOpen? "rotate-135": " mt-[-15px]"} duration-300 bg-[#F47B25] w-[20px] h-[2px] rounded-full`}> </div>
+                        <div className={`absolute ${IsMenuOpen? "hidden" : " mt-[0px]"} bg-[#F47B25] w-[16px] h-[2px] rounded-full`}> </div>
+                        <div className={`absolute ${IsMenuOpen? "rotate-405": "mt-[15px]"} duration-300 bg-[#F47B25] w-[20px] h-[2px] rounded-full`}> </div>
+                        
+                    </button>
 
             </div>
 

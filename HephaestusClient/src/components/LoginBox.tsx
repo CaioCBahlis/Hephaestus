@@ -1,7 +1,8 @@
 import {LockKeyhole, Eye, EyeClosed, Mail, CircleArrowRight} from 'lucide-react'
 import {useState, useEffect} from "react"
 import { useNavigate } from "react-router";
-import {AccountClient, type LoginPayload, type Tokens } from '../api/AccountClient'
+import {AccountClient, type LoginPayload} from '../api/AccountClient'
+import { useUser } from './UserContextProvider';
 
 
 
@@ -11,6 +12,7 @@ export default function LoginBox(){
     const [password, setPassword] = useState<string>("")
     const [show, setShow] = useState<Boolean>(false)
     let navigate = useNavigate();
+    const {setUser} = useUser()
 
     useEffect(() => {
         AccountClient.getCSRF()
@@ -24,10 +26,10 @@ export default function LoginBox(){
        
         if (res.status){
 
-            console.log(res.data.access, res.data.refresh)
             localStorage.setItem("AccessToken", res.data.access)
             localStorage.setItem("RefreshToken", res.data.refresh)
             
+            setUser({email: email})
             navigate("/chatbot")
         }
 

@@ -6,6 +6,10 @@ from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
 import json
 import random
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from chatbot.models import Conversations, Files
+
 
 from chatbot.utils import ParseToGemini
 
@@ -15,13 +19,14 @@ from . import gemini_config
 
 # Create your views here.
 
-@csrf_exempt #TODO: remove when deploying, or some other thing like conditionaal decorator
-@require_POST
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
 def post_user_query(request) -> JsonResponse:
-    try:
-        data = json.loads(request.body.decode("utf-8"))
+    UserId = request.user.id
 
-        conversation_history = data.get("ChatContext") # TODO: validate conversation history
+    try:
+        data = json.loads(request.body.decode("utf-8"))        
+        conversation_history = data.get("ChatContext") 
 
         if not conversation_history:
             print(f"Error sending message, got: Conversation History Missing")
@@ -59,7 +64,10 @@ def post_user_query(request) -> JsonResponse:
 PossibleReplies = [
 "Ba Armandinho é o terror né meu, eu fico no horror com esse loco, é um poeta né meu, ba. Não tem quem não goste do loco, o pinta é afudê."
 ]
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
 def PostUserFiles(request):
+    id = request.user.id
     file = request.FILES.get("File")
     ext = Path(file.name).suffix.lower()
     filename = f"{uuid.uuid4().hex}{ext}"
@@ -68,5 +76,7 @@ def PostUserFiles(request):
     with out_path.open("wb") as out:
         for chunk in file.chunks():
             out.write(chunk)
+
+    Files.objects.create(file_name=filename, path=out_path, extension=ext, user_id=request.user)
     BotResponse = random.choice(PossibleReplies)
-    return JsonResponse({"Reply": BotResponse}, status=200)
+    return JsonResponse({"reply": BotResponse}, status=200)
