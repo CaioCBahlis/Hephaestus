@@ -30,6 +30,7 @@ export default function LoginBox(){
             localStorage.setItem("RefreshToken", res.data.refresh)
             
             setUser({email: email})
+          
             navigate("/chatbot")
         }
 

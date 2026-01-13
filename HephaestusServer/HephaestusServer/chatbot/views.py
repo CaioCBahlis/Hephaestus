@@ -21,9 +21,9 @@ from . import gemini_config
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
-def post_user_query(request) -> JsonResponse:
+def post_user_query(request, session_id) -> JsonResponse:
     UserId = request.user.id
-
+    
     try:
         data = json.loads(request.body.decode("utf-8"))        
         conversation_history = data.get("ChatContext") 
@@ -32,7 +32,10 @@ def post_user_query(request) -> JsonResponse:
             print(f"Error sending message, got: Conversation History Missing")
             return JsonResponse({"error": "Conversation history missing"}, status=400)
         
-        
+        ConvSession = Conversations.objects.get(id=session_id)
+        ConvSession.messages = conversation_history
+        ConvSession.save()
+
         GeminiPayload = ParseToGemini(conversation_history) #Model Agnostic, change parsing based on Model
 
 
@@ -66,8 +69,9 @@ PossibleReplies = [
 ]
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
-def PostUserFiles(request):
+def PostUserFiles(request, session_id):
     id = request.user.id
+
     file = request.FILES.get("File")
     ext = Path(file.name).suffix.lower()
     filename = f"{uuid.uuid4().hex}{ext}"
@@ -80,3 +84,12 @@ def PostUserFiles(request):
     Files.objects.create(file_name=filename, path=out_path, extension=ext, user_id=request.user)
     BotResponse = random.choice(PossibleReplies)
     return JsonResponse({"reply": BotResponse}, status=200)
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def get_session_id(request):
+    UserId = request.user.id
+
+    NewSession = Conversations.objects.create(name="undefined", messages="{}", user_id=request.user)
+    return JsonResponse({"SessionId": NewSession.id}, status=201) #Created Status

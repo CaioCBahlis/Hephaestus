@@ -33,8 +33,8 @@ createRoot(document.getElementById('root')!).render(
           <Routes>
             <Route path="/" element={<Home/>} />
 
-            
               <Route path="/chatbot" element={<Chatbot/>} />
+              <Route path="/chatbot/:sessionId" element={<Chatbot/>} />
 
               <Route path="/login" element={<Login/>} />
 

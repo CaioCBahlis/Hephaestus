@@ -24,13 +24,13 @@ type ApiResult<T> =
 
 export const ChatbotClient =  {
 
-    PostUserQuery: async (ChatContext: ChatHistory): Promise<ApiResult<BotReply>> => {
+    PostUserQuery: async (ChatContext: ChatHistory, SessionId: string): Promise<ApiResult<BotReply>> => {
 
         try {
 
             const Token = localStorage.getItem("AccessToken")
 
-            const res = await client.post("chatbot/query/",
+            const res = await client.post(`chatbot/query/${SessionId}`,
                 ChatContext,
                 {
                  withCredentials: true,
@@ -50,7 +50,7 @@ export const ChatbotClient =  {
         
     },
 
-    PostUserFiles: async (Message: UserFileMessage ) => {
+    PostUserFiles: async (Message: UserFileMessage, SessionId: string ) => {
         
         try {
 
@@ -58,7 +58,7 @@ export const ChatbotClient =  {
             Payload.append("File", Message.File)
             const Token = localStorage.getItem("AccessToken")
 
-            const res = await client.post("chatbot/file_upload/", 
+            const res = await client.post(`chatbot/file_upload/${SessionId}`, 
                 Message, 
                 {
                     withCredentials: true, 
@@ -76,5 +76,24 @@ export const ChatbotClient =  {
         }
 
     },
+
+    GetSessionId: async () => {
+
+        try{
+
+            const Token = localStorage.getItem("AccessToken")
+
+            const res = await client.get("chatbot/get_session_id/", {
+                    withCredentials: true, 
+                    headers: { Authorization: `Bearer ${Token}`, "Content-Type": "multipart/form-data" }
+            })
+            return {ok: true, status: res.status, data: res.data["SessionId"]}
+
+        }catch (err: any){
+
+            console.log("Failed to Fetch Session Id")
+            return {ok:false, status: err.response?.status, data: err}
+        }
+    }
 
 }

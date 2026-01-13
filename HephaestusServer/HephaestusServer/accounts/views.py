@@ -3,6 +3,8 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import ensure_csrf_cookie
 from accounts.models import UserAccount, UserAccountManager
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 
 @ensure_csrf_cookie
 
@@ -33,3 +35,10 @@ def Register(request):
 def GetCSRF(request):
      return JsonResponse({"ok": True})
 
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def auth_me(request):
+
+    return JsonResponse({"id": request.user.id, "email": request.user.email})
