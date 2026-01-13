@@ -12,7 +12,6 @@ export type UserTextMessage = {
     UserMessage: Boolean
 }
 
-
 export type UserFileMessage = {
     File: File
     UserMessage:Boolean
