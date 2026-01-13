@@ -2,22 +2,32 @@ import json
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import ensure_csrf_cookie
+from accounts.models import UserAccount, UserAccountManager
 
 @ensure_csrf_cookie
 
 
-
 @require_POST
-def LogIn(request):
-
+def Register(request):
     data = json.loads(request.body.decode("utf-8"))
+    
+    Name = data.get("Name")
+    LastName = data.get("LastName")
+    EmailAddress = data.get('Email')
+    Password = data.get("Password")
 
-    email_adress = data.get('email_address')
-    password = data.get('password')
+    #TODO Check if Email Address Already In Database And redirect to Login Page
+    # Salt and Hash the password, password is being stored in plaintext
 
-    if email_adress == "admin" and password == 'admin':
-        return JsonResponse({"ok":True}, status=200)
-    return JsonResponse({"error": "Invalid Crentials"}, status=400)
+    User = UserAccount.objects.create_user(
+        email=EmailAddress,
+        password=Password,
+        first_name=Name,
+        last_name=LastName,
+    )
+
+    return JsonResponse({"ok":True}, status=200)
+
 
 @ensure_csrf_cookie
 def GetCSRF(request):

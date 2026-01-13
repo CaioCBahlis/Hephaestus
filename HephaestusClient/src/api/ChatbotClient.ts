@@ -1,5 +1,6 @@
 import {client} from "./client.ts"
-import type { MessageProps } from "../components/Message.tsx"
+import type { ChatHistory } from "../pages/Chatbot.tsx"
+
 
 
 type BotReply = {
@@ -17,23 +18,64 @@ export type UserFileMessage = {
     UserMessage:Boolean
 }
 
+type ApiResult<T> =
+  | { ok: true; data: T }
+  | { ok: false; status?: number; error: unknown };
+
 
 export const ChatbotClient =  {
 
-    PostUserQuery: async (Message: UserTextMessage) => {
+    PostUserQuery: async (ChatContext: ChatHistory): Promise<ApiResult<BotReply>> => {
 
-        const res = await client.post<BotReply>("chatbot/query/", Message)
-        return res.data.Reply
+        try {
+
+            const Token = localStorage.getItem("AccessToken")
+
+            const res = await client.post("chatbot/query/",
+                ChatContext,
+                {
+                 withCredentials: true,
+                 headers: { Authorization: `Bearer ${Token}` }
+                }
+            )
+            return {ok: true, data: res.data}
+
+        }catch(err: any){
+
+            return {
+                ok: false,
+                status: err.response?.status,
+                error: err.response?.data ?? err.message
+            }
+        }
+        
     },
 
     PostUserFiles: async (Message: UserFileMessage ) => {
         
-        const Payload = new FormData()
-        Payload.append("File", Message.File)
+        try {
 
-        const res = await client.post<BotReply>("chatbot/file_upload/", Message, { headers: { "Content-Type": "multipart/form-data" }})
-        return res.data.Reply
+            const Payload = new FormData()
+            Payload.append("File", Message.File)
+            const Token = localStorage.getItem("AccessToken")
 
-    }
+            const res = await client.post("chatbot/file_upload/", 
+                Message, 
+                {
+                    withCredentials: true, 
+                    headers: { Authorization: `Bearer ${Token}`, "Content-Type": "multipart/form-data" }
+                })
+            return {ok: true, data: res.data}
+
+        }catch(err: any){
+
+             return {
+                ok: false,
+                status: err.response?.status,
+                error: err.response?.data ?? err.message
+            }
+        }
+
+    },
 
 }

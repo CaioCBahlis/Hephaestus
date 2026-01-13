@@ -1,20 +1,92 @@
 import {Anvil, Menu} from 'lucide-react'
-import {useState} from "react"
+import {useEffect, useState} from "react"
 import Chat from '../components/Chat'
 import ChatUserInput from '../components/ChatUserInput'
 import type { MessageProps } from '../components/Message'
+import { ChatbotClient } from '../api/ChatbotClient'
+import { useUser } from '../components/UserContextProvider'
+import { Navigate } from 'react-router'
+
 
 
 
 const InitialMessage: MessageProps = {
             Text: "Hello, I'm Hephaestus AI, your personal financial Advisor. How can I help you today?", 
             UserMessage: false,
-             MessageType: "Text"
+            MessageType: "Text"
         }
 
+export type ChatHistory = {
+    ChatContext: MessageProps[]
+}
+
+
+
+
 export default function Chatbot(){
-    const [Messages, setMesssages] = useState<MessageProps[]>([InitialMessage])
+    const [Messages, setMessages] = useState<MessageProps[]>([InitialMessage])
     const [UserQuery, setQuery] = useState<string>("")
+    const [File, SetFiles] = useState<File | null>(null)
+    const [IsMenuOpen, setMenuOpen] = useState<boolean>(false)
+
+    const { user, loading } = useUser()
+
+    if (!user) return <Navigate to="/login" replace />
+
+
+    async function handleSubmit(NewMessage: MessageProps){
+
+     
+        setMessages(x => [...x, NewMessage])
+        
+        let reply;
+        if (NewMessage.MessageType === "File"){
+            reply = await ChatbotClient.PostUserFiles({File: File!, UserMessage: true})
+        }else{
+            reply = await ChatbotClient.PostUserQuery({ChatContext: [...Messages, NewMessage]}) //React Will only update messages next tick, do it manually instead
+        }
+
+        let BotResponse: MessageProps = {
+            Text: "",
+            UserMessage: false,
+            MessageType: "Text"
+        }
+
+
+        if (!reply.ok) {
+            BotResponse.Text = "An error occurred. Please try again later."
+        } else {
+            BotResponse.Text = reply.data["reply"]
+        }
+
+        setMessages(x => [...Messages, NewMessage, BotResponse])
+
+        setQuery("")
+        SetFiles(null)
+    }
+
+    useEffect(() => {
+        if (UserQuery === "" && File === null){ //Prevents Sending Messages on Mount
+            return
+        }
+
+        //TODO: Support Message and File
+        //Right now, it either sends a File or a Message
+        // Because of this if statement, and also because they have different endpoints
+        //In the future, merge both endpoints to one to support Files with Messages
+        let NewMessage: MessageProps;
+        if (File != null){
+        
+            NewMessage = {Text: "" , UserMessage: true, MessageType: "File", File: File}
+        }else{
+            NewMessage = {Text: UserQuery , UserMessage: true, MessageType: "Text"}
+        }
+
+        handleSubmit(NewMessage)
+
+    }, [UserQuery, File])
+
+    
     
     return (
 
@@ -22,7 +94,7 @@ export default function Chatbot(){
 
             <div className="w-screen h-[10vh] bg-[#201810] flex justify-between items-center">
 
-                    <div className='w-[50%] h-full flex justify-around items-center ml-3'>
+                    <div className='w-[50%] h-full flex justify-center gap-[10px] items-center ml-3'>
 
                         <div className="relative p-2 border-1 border-[#3E1B12] rounded-[50%]">
                             <Anvil size={25} color='#F47B25'/> 
@@ -39,16 +111,22 @@ export default function Chatbot(){
 
                     </div>
 
-                    <div className="mr-3 flex justify-center items-center">
-                        <Menu color='#F47B25'/>
+                    <button className="relative w-[20px] h-[20px] right-[35px] flex justify-center items-center flex flex-col"
+                    onClick={() => {
+                        setMenuOpen(x => !x)
+                    }}>
 
-                    </div>
+                        <div className={`absolute ${IsMenuOpen? "rotate-135": " mt-[-15px]"} duration-300 bg-[#F47B25] w-[20px] h-[2px] rounded-full`}> </div>
+                        <div className={`absolute ${IsMenuOpen? "hidden" : " mt-[0px]"} bg-[#F47B25] w-[16px] h-[2px] rounded-full`}> </div>
+                        <div className={`absolute ${IsMenuOpen? "rotate-405": "mt-[15px]"} duration-300 bg-[#F47B25] w-[20px] h-[2px] rounded-full`}> </div>
+                        
+                    </button>
 
             </div>
 
             <Chat Messages={Messages}/> 
 
-            <ChatUserInput UserQuery={UserQuery} SetQuery={setQuery} SetMessages={setMesssages}/> 
+            <ChatUserInput SetQuery={setQuery} SetFiles={SetFiles} /> 
 
         </div>
     )

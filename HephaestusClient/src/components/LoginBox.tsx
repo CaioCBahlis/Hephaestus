@@ -1,7 +1,8 @@
 import {LockKeyhole, Eye, EyeClosed, Mail, CircleArrowRight} from 'lucide-react'
 import {useState, useEffect} from "react"
 import { useNavigate } from "react-router";
-import {AccountClient, type LoginPayload } from '../api/AccountClient'
+import {AccountClient, type LoginPayload} from '../api/AccountClient'
+import { useUser } from './UserContextProvider';
 
 
 
@@ -11,6 +12,7 @@ export default function LoginBox(){
     const [password, setPassword] = useState<string>("")
     const [show, setShow] = useState<Boolean>(false)
     let navigate = useNavigate();
+    const {setUser} = useUser()
 
     useEffect(() => {
         AccountClient.getCSRF()
@@ -19,13 +21,19 @@ export default function LoginBox(){
     async function handleLogin(Login: LoginPayload) {
         //TODO: Add Validation On Login
         
-        const res = await AccountClient.login(Login)
-        
-        if (res.ok){
+        const res = await AccountClient.GetToken(Login)
+ 
+       
+        if (res.status){
+
+            localStorage.setItem("AccessToken", res.data.access)
+            localStorage.setItem("RefreshToken", res.data.refresh)
+            
+            setUser({email: email})
             navigate("/chatbot")
         }
 
-        //Set Session Token
+        
 
 
         return false
@@ -61,7 +69,7 @@ export default function LoginBox(){
                 </div>
             </div>
 
-            <button onClick={() => {handleLogin({email_address:email, password:password})}} className="w-full h-[min(100%,40vh)] bg-[#E4813D] mt-[20px] flex justify-center items-center gap-[5px] rounded-sm">
+            <button onClick={() => {handleLogin({email:email, password:password})}} className="w-full h-[min(100%,40vh)] bg-[#E4813D] mt-[20px] flex justify-center items-center gap-[5px] rounded-sm">
                 <span className="text-white font-primary text-lg font-bold"> Log In </span>
                 <CircleArrowRight color="#FFF"/>
             </button>
@@ -77,7 +85,7 @@ export default function LoginBox(){
                 <CircleArrowRight color="#FFF"/>
             </button>
 
-            <span className="text-white primary-font text-[13px]"> New Here? <span className="primary-color"> Create an Account</span>  </span>
+            <a href='/register' className="text-white primary-font text-[13px]"> New Here? <span className="primary-color"> Create an Account</span>  </a>
 
         </div>
 

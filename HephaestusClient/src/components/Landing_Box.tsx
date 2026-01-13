@@ -1,4 +1,4 @@
-
+import type { JSX } from "react";
 
 export default function LandingBox(props: {Icon: JSX.Element, title: string, description: string}) {
 

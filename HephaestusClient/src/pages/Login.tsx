@@ -1,11 +1,10 @@
 import {Anvil} from 'lucide-react'
-import { useState } from 'react'
+
 import LoginBox from '../components/LoginBox'
 
 
 export default function Login(){
-    const [name, setName] = useState<string>("")
-    const [password, setPassword] = useState<string>("")
+
 
     return (
         <div className="w-screen h-screen bg-[#1B100E] flex flex-col justify-start items-center">
