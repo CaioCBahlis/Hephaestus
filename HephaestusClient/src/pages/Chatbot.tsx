@@ -5,7 +5,7 @@ import ChatUserInput from '../components/ChatUserInput'
 import type { MessageProps } from '../components/Message'
 import { ChatbotClient } from '../api/ChatbotClient'
 import { useUser } from '../components/UserContextProvider'
-import { Navigate } from 'react-router'
+import { Navigate, useNavigate, useParams } from 'react-router'
 
 
 
@@ -21,17 +21,76 @@ export type ChatHistory = {
 }
 
 
-
-
 export default function Chatbot(){
     const [Messages, setMessages] = useState<MessageProps[]>([InitialMessage])
     const [UserQuery, setQuery] = useState<string>("")
     const [File, SetFiles] = useState<File | null>(null)
     const [IsMenuOpen, setMenuOpen] = useState<boolean>(false)
+    const {sessionId} = useParams();
+    const navigate = useNavigate()
+
+
+    useEffect(() => {
+
+        if (sessionId) {
+
+            const res = ChatbotClient.GetSessionContext(sessionId)
+            res.then(x => {
+                if (!x.ok){
+                    throw new Error("Failed to Get Session Context")
+                
+                }
+
+                console.log(x.data)
+                setMessages(x.data)
+            })
+
+
+            return
+        }
+
+        ChatbotClient.GetSessionId().then(x => {
+            if (x.status !== 201) {
+            console.log(`Failed to Fetch Session Data, got ${x.data}`)
+            return
+            }
+            navigate(`/chatbot/${x.data}`)
+        })
+        
+    }, [sessionId])
+
+     useEffect(() => {
+        if (UserQuery === "" && File === null){ //Prevents Sending Messages on Mount
+            return
+        }
+
+        //TODO: Support Message and File
+        //Right now, it either sends a File or a Message
+        // Because of this if statement, and also because they have different endpoints
+        //In the future, merge both endpoints to one to support Files with Messages
+        let NewMessage: MessageProps;
+        if (File != null){
+        
+            NewMessage = {Text: "" , UserMessage: true, MessageType: "File", File: File}
+        }else{
+            NewMessage = {Text: UserQuery , UserMessage: true, MessageType: "Text"}
+        }
+
+        handleSubmit(NewMessage)
+
+    }, [UserQuery, File])
 
     const { user, loading } = useUser()
 
-    if (!user) return <Navigate to="/login" replace />
+
+    if (loading) {
+    return null // or spinner
+    }
+
+    if (!user) {
+    return <Navigate to="/login" replace />
+    }
+
 
 
     async function handleSubmit(NewMessage: MessageProps){
@@ -41,9 +100,9 @@ export default function Chatbot(){
         
         let reply;
         if (NewMessage.MessageType === "File"){
-            reply = await ChatbotClient.PostUserFiles({File: File!, UserMessage: true})
+            reply = await ChatbotClient.PostUserFiles({File: File!, UserMessage: true}, sessionId!.toString())
         }else{
-            reply = await ChatbotClient.PostUserQuery({ChatContext: [...Messages, NewMessage]}) //React Will only update messages next tick, do it manually instead
+            reply = await ChatbotClient.PostUserQuery({ChatContext: [...Messages, NewMessage]}, sessionId!.toString()) //React Will only update messages next tick, do it manually instead
         }
 
         let BotResponse: MessageProps = {
@@ -65,28 +124,7 @@ export default function Chatbot(){
         SetFiles(null)
     }
 
-    useEffect(() => {
-        if (UserQuery === "" && File === null){ //Prevents Sending Messages on Mount
-            return
-        }
-
-        //TODO: Support Message and File
-        //Right now, it either sends a File or a Message
-        // Because of this if statement, and also because they have different endpoints
-        //In the future, merge both endpoints to one to support Files with Messages
-        let NewMessage: MessageProps;
-        if (File != null){
-        
-            NewMessage = {Text: "" , UserMessage: true, MessageType: "File", File: File}
-        }else{
-            NewMessage = {Text: UserQuery , UserMessage: true, MessageType: "Text"}
-        }
-
-        handleSubmit(NewMessage)
-
-    }, [UserQuery, File])
-
-    
+ 
     
     return (
 

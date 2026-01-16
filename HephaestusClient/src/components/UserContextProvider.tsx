@@ -1,5 +1,6 @@
-import { useContext, useState, type ReactNode } from "react";
+import { useContext, useEffect, useState, type ReactNode } from "react";
 import { createContext } from "react";
+import { AccountClient } from "../api/AccountClient";
 
 
 
@@ -18,6 +19,14 @@ export const UserContext = createContext<UserContextType | null>(null)
 export default function UserContextProvider({children}:  {children: ReactNode}){
     const [user, setUser] = useState<User | null>(null)
     const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+
+    const res = AccountClient.AuthMe()
+      res.then(x => setUser(x["email"]))
+      .finally(() => setLoading(false))
+
+  }, [])
 
 
 

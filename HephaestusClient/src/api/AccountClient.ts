@@ -41,6 +41,17 @@ export const AccountClient = {
     register: async (body: RegisterPayload) => {
         const res = await client.post<Response>("/accounts/create_account/", body)
         return res.data
+    },
+
+    AuthMe: async () => {
+        
+        const Token = localStorage.getItem("AccessToken")
+        const res = await client.get("/accounts/auth/me", 
+            {
+                 withCredentials: true,
+                 headers: { Authorization: `Bearer ${Token}` }
+            })
+        return res.data
     }
 
 

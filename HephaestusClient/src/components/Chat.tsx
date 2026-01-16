@@ -12,6 +12,7 @@ export default function Chat(props: { Messages: MessageProps[] }) {
         ))}
 
       </div>
+      
     </div>
   );
 }
