@@ -111,6 +111,26 @@ export const ChatbotClient =  {
             console.log("Failed to Fetch Session Context")
             return {ok:false, status: err.response?.status, data: err}
         }
+    },
+
+    GetUserSessions: async () => {
+
+        try{
+
+            const Token = localStorage.getItem("AccessToken")
+
+            const res = await client.get(`chatbot/get_user_sessions`, {
+                    withCredentials: true, 
+                    headers: { Authorization: `Bearer ${Token}`, "Content-Type": "multipart/form-data" }
+            })
+            return {ok: true, status: res.status, data: res.data["Sessions"]}
+
+        }catch (err: any){
+
+            console.log("Failed to Fetch Session Data from User")
+            return {ok:false, status: err.response?.status, data: err}
+        }
+
     }
 
 }

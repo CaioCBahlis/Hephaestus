@@ -40,5 +40,4 @@ def GetCSRF(request):
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def auth_me(request):
-
     return JsonResponse({"id": request.user.id, "email": request.user.email})

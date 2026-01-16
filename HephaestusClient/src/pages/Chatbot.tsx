@@ -6,6 +6,7 @@ import type { MessageProps } from '../components/Message'
 import { ChatbotClient } from '../api/ChatbotClient'
 import { useUser } from '../components/UserContextProvider'
 import { Navigate, useNavigate, useParams } from 'react-router'
+import SessionModal from '../components/SessionModal'
 
 
 
@@ -14,7 +15,7 @@ const InitialMessage: MessageProps = {
             Text: "Hello, I'm Hephaestus AI, your personal financial Advisor. How can I help you today?", 
             UserMessage: false,
             MessageType: "Text"
-        }
+}
 
 export type ChatHistory = {
     ChatContext: MessageProps[]
@@ -29,6 +30,12 @@ export default function Chatbot(){
     const {sessionId} = useParams();
     const navigate = useNavigate()
 
+    useEffect(() => {
+
+        const res = ChatbotClient.GetUserSessions()
+        res.then(x => console.log(x.data))
+
+    }, [])
 
     useEffect(() => {
 
@@ -128,9 +135,11 @@ export default function Chatbot(){
     
     return (
 
-        <div className="w-screen h-screen bg-[#1B100E] flex flex-col justify-arounditems-center">
+        <div className="w-screen h-screen bg-[#1B100E] flex flex-col justify-around">
+            <SessionModal IsMenuOpen={IsMenuOpen} setOpen={setMenuOpen}/>
 
             <div className="w-screen h-[10vh] bg-[#201810] flex justify-between items-center">
+                
 
                     <div className='w-[50%] h-full flex justify-center gap-[10px] items-center ml-3'>
 
@@ -148,15 +157,17 @@ export default function Chatbot(){
                         </div>
 
                     </div>
-
-                    <button className="relative w-[20px] h-[20px] right-[35px] flex justify-center items-center flex flex-col"
+                    
+                    
+                    
+                    <button className="relative w-[20px] h-[20px] right-[35px] flex justify-center items-center flex flex-col z-3"
                     onClick={() => {
                         setMenuOpen(x => !x)
                     }}>
 
-                        <div className={`absolute ${IsMenuOpen? "rotate-135": " mt-[-15px]"} duration-300 bg-[#F47B25] w-[20px] h-[2px] rounded-full`}> </div>
-                        <div className={`absolute ${IsMenuOpen? "hidden" : " mt-[0px]"} bg-[#F47B25] w-[16px] h-[2px] rounded-full`}> </div>
-                        <div className={`absolute ${IsMenuOpen? "rotate-405": "mt-[15px]"} duration-300 bg-[#F47B25] w-[20px] h-[2px] rounded-full`}> </div>
+                        <div className={`absolute ${IsMenuOpen? "rotate-135": " mt-[-15px]"} duration-300 bg-[#F47B25] w-[20px] h-[2px] rounded-full z-3`}> </div>
+                        <div className={`absolute ${IsMenuOpen? "hidden" : " mt-[0px]"} bg-[#F47B25] w-[16px] h-[2px] rounded-full z-3`}> </div>
+                        <div className={`absolute ${IsMenuOpen? "rotate-405": "mt-[15px]"} duration-300 bg-[#F47B25] w-[20px] h-[2px] rounded-full z-3`}> </div>
                         
                     </button>
 
