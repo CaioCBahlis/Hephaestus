@@ -109,14 +109,24 @@ def get_session_id(request):
 def get_user_sessions(request):
     UserId = request.user.id
 
-    UserConversations = Conversations.objects.get(user_id_id=UserId)
-
+    UserConversations = Conversations.objects.filter(user_id_id=request.user)
     print(UserConversations)
+
+    MyConversation = []
+    for Conversation in UserConversations:
+        ConversationObj = {"id": Conversation.id, "name": Conversation.name, "messages": Conversation.messages}
+        MyConversation.append(ConversationObj)
+
+
+    return JsonResponse({"Sessions": MyConversation}, status=200)
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def get_session_context(request, session_id):
-
     UserId = request.user.id
+
     UserConversations = Conversations.objects.get(id=session_id, user_id_id=request.user)
+    print(UserConversations)
+
+
     return JsonResponse({"messages": UserConversations.messages}, status=200)
