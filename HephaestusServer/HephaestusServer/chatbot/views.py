@@ -110,10 +110,10 @@ def get_user_sessions(request):
     UserId = request.user.id
 
     UserConversations = Conversations.objects.filter(user_id_id=request.user)
-    print(UserConversations)
+   
 
     MyConversation = []
-    for Conversation in UserConversations:
+    for Conversation in UserConversations[::-1]: #Newest Conversations First
         ConversationObj = {"id": Conversation.id, "name": Conversation.name, "messages": Conversation.messages}
         MyConversation.append(ConversationObj)
 

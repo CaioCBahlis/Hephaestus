@@ -20,12 +20,8 @@ export default function SessionModal(props: {IsMenuOpen: boolean, setOpen: React
 
 
     useEffect(() => {
-
-        const res = ChatbotClient.GetUserSessions()
-        res.then(x => setSessions(x.data))
-        
-
-    }, [])
+        ChatbotClient.GetUserSessions().then(res => {setSessions(res.data.filter((x: UserSession) => x.messages.length > 1));});
+}, []);
 
 
 

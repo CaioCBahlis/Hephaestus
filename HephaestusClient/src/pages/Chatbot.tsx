@@ -101,9 +101,16 @@ export default function Chatbot(){
 
 
     async function handleSubmit(NewMessage: MessageProps){
+        
+        const ThinkingMessage: MessageProps = {
+            Text: "",
+            UserMessage: false,
+            MessageType: "Thinking"
+        }
+        
 
-     
-        setMessages(x => [...x, NewMessage])
+        
+        setMessages(x => [...x, NewMessage, ThinkingMessage])
         
         let reply;
         if (NewMessage.MessageType === "File"){
@@ -116,7 +123,7 @@ export default function Chatbot(){
             Text: "",
             UserMessage: false,
             MessageType: "Text"
-        }
+        }   
 
 
         if (!reply.ok) {
@@ -124,7 +131,7 @@ export default function Chatbot(){
         } else {
             BotResponse.Text = reply.data["reply"]
         }
-
+        
         setMessages(x => [...Messages, NewMessage, BotResponse])
 
         setQuery("")
