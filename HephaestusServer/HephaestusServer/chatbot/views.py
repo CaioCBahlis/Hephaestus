@@ -1,3 +1,4 @@
+import base64
 from django.http import JsonResponse
 from django.conf import settings
 from pathlib import Path
@@ -9,13 +10,10 @@ import random
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from chatbot.models import Conversations, Files
-
-
-from chatbot.utils import ParseToGemini
-
-
-
+from chatbot.utils import ParseToGemini, ParseBankStatement
 from . import gemini_config
+
+MIME_BY_EXT = {".pdf":"application/pdf", ".csv":"text/csv"}
 
 # Create your views here.
 
@@ -72,9 +70,7 @@ def post_user_query(request, session_id) -> JsonResponse:
         return JsonResponse({"error": f"Internal server error: {e}"}, status=500)
     
     
-PossibleReplies = [
-"Ba Armandinho é o terror né meu, eu fico no horror com esse loco, é um poeta né meu, ba. Não tem quem não goste do loco, o pinta é afudê."
-]
+
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def PostUserFiles(request, session_id):
@@ -90,8 +86,25 @@ def PostUserFiles(request, session_id):
             out.write(chunk)
 
     Files.objects.create(file_name=filename, path=out_path, extension=ext, user_id=request.user)
-    BotResponse = random.choice(PossibleReplies)
-    return JsonResponse({"reply": BotResponse}, status=200)
+    ParseBankStatement(out_path)
+
+    
+    with open(out_path, "rb") as f:
+        b64_data = base64.b64encode(f.read()).decode("utf-8")
+
+    mime_type = MIME_BY_EXT.get(ext, "application/octet-stream")
+    model = gemini_config.generate_chatbot_model({"to_be_implemented": "Get_User_Data"})
+    bot_response = model.generate_content([
+        "Summarize this document and ask if the user has any questions.",
+        {"mime_type": mime_type, "data": b64_data},
+    ])
+   
+    BotReply = bot_response.candidates[0].content.parts[0].text
+    
+    
+
+ 
+    return JsonResponse({"reply": BotReply}, status=200)
 
 
 @api_view(["GET"])
