@@ -216,17 +216,3 @@ def ParseBankOfAmerica(FilePath: str):
 
     except Exception as e:
         print(f"Error Occured, got: {e}")
-
-# TODO: create type for user data
-test_user_data = {
-    "name": "Gustavo",
-    "country": "USA",
-    "currency": "USD",
-    "financial_goal": "Save money to buy a ranch"
-}
-
-test_conv_history = [
-        {"UserMessage": True, "Text": "How much did I spend on travel the last month?"}
-]
-
-print(get_gemini_response(test_user_data, test_conv_history))
