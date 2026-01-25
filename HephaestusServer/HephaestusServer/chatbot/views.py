@@ -6,12 +6,11 @@ import uuid
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
 import json
-import random
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from chatbot.models import Conversations, Files
 from chatbot.utils import ParseToGemini, ParseBankStatement
-from . import gemini_config
+from chaatbot import gemini_config, utils
 
 MIME_BY_EXT = {".pdf":"application/pdf", ".csv":"text/csv"}
 
@@ -33,18 +32,11 @@ def post_user_query(request, session_id) -> JsonResponse:
         ConvSession = Conversations.objects.get(id=session_id)
         ConvSession.messages = conversation_history
         ConvSession.save()
-
-
-        GeminiPayload = ParseToGemini(conversation_history) #Model Agnostic, change parsing based on Model
-
-
-        model = gemini_config.generate_chatbot_model({"to_be_implemented": "Get_User_Data"}) 
-        bot_response = model.generate_content(GeminiPayload)
-        bot_message = bot_response.candidates[0].content.parts[0].text
-
-
-        Bot_Reply_Json = {"Text": bot_message, "MessageType": "Text", "UserMessage": False}
         
+        user_data = {}
+        bot_message = utils.get_gemini_response(user_data, conversation_history)
+        
+        Bot_Reply_Json = {"Text": bot_message, "MessageType": "Text", "UserMessage": False}
 
         ConvSession.messages.append(Bot_Reply_Json)
         ConvSession.save()
@@ -101,9 +93,6 @@ def PostUserFiles(request, session_id):
    
     BotReply = bot_response.candidates[0].content.parts[0].text
     
-    
-
- 
     return JsonResponse({"reply": BotReply}, status=200)
 
 
