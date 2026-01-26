@@ -9,7 +9,7 @@ import json
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from chatbot.models import Conversations, Files
-from chatbot.utils import ParseToGemini, ParseBankStatement
+from chatbot.utils import ParseBankStatement
 from chatbot import gemini_config, utils
 
 MIME_BY_EXT = {".pdf":"application/pdf", ".csv":"text/csv"}
