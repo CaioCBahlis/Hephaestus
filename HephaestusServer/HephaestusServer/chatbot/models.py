@@ -3,7 +3,6 @@ from pydantic import BaseModel
 from typing import Any, Callable
 import uuid
 
-'''
 class Files(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
@@ -30,7 +29,6 @@ class Transactions(models.Model):
     category = models.CharField(max_length=200)
 
 
-'''
 # Internal Models, no need for as much data cleaning 
 class ToolParam(BaseModel):
     name: str
