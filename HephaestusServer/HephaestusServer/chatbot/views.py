@@ -11,6 +11,7 @@ from rest_framework.permissions import IsAuthenticated
 from chatbot.models import Conversations, Files
 from chatbot.utils import ParseBankStatement
 from chatbot import gemini_config, utils
+from django.core.cache import cache
 
 MIME_BY_EXT = {".pdf":"application/pdf", ".csv":"text/csv"}
 
@@ -31,7 +32,10 @@ def post_user_query(request, session_id) -> JsonResponse:
         
         ConvSession = Conversations.objects.get(id=session_id)
         ConvSession.messages = conversation_history
-        ConvSession.save()
+        ConvSession.save() 
+
+        cache.set(hash(str(UserId)+str(session_id)), ConvSession.messages)
+        cache.delete(hash(UserId))
         
         user_data = {}
         bot_message = utils.get_gemini_response(user_data, conversation_history)
@@ -90,6 +94,7 @@ def PostUserFiles(request, session_id):
         "Summarize this document and ask if the user has any questions.",
         {"mime_type": mime_type, "data": b64_data},
     ])
+
    
     BotReply = bot_response.candidates[0].content.parts[0].text
     
@@ -111,6 +116,13 @@ def get_session_id(request):
 def get_user_sessions(request):
     UserId = request.user.id
 
+    redis_key = f"{hash(UserId)}"
+    ans = cache.get(redis_key)
+    if ans is not None:
+        print('UserSessions Cache Hit')
+        return JsonResponse({"Sessions": ans}, status=200)
+    
+
     UserConversations = Conversations.objects.filter(user_id_id=request.user)
    
 
@@ -118,17 +130,26 @@ def get_user_sessions(request):
     for Conversation in UserConversations[::-1]: #Newest Conversations First
         ConversationObj = {"id": Conversation.id, "name": Conversation.name, "messages": Conversation.messages}
         MyConversation.append(ConversationObj)
-
+    
+    ans = cache.set(redis_key, MyConversation)
 
     return JsonResponse({"Sessions": MyConversation}, status=200)
+
+
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def get_session_context(request, session_id):
     UserId = request.user.id
 
+    ans = cache.get(hash(str(UserId)+str(session_id)))
+    if ans is not None:
+        print("Session Context Cache Hit")
+        return JsonResponse({"messages": ans}, status=200)
+
+
     UserConversations = Conversations.objects.get(id=session_id, user_id_id=request.user)
-    print(UserConversations)
+    cache.set(hash(str(UserId)+str(session_id)), UserConversations.messages)
 
 
     return JsonResponse({"messages": UserConversations.messages}, status=200)
