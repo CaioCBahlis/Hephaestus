@@ -1,3 +1,4 @@
+import { toast } from "react-toastify"
 import {client} from "./client.ts"
 
 
@@ -33,8 +34,12 @@ export const AccountClient = {
 
     GetToken : async (body: LoginPayload) => {
         
-       const res = await client.post<Tokens>("/accounts/token/", body)
-       return res
+        try{
+            const res = await client.post<Tokens>("/accounts/token/", body)
+            return res
+        } catch (e){
+            return undefined
+        }
 
     },
 

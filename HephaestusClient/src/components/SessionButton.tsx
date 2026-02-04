@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import type { UserSession } from "./SessionModal";
 import { Navigate, useNavigate } from "react-router";
+import type { MessageProps } from "./Message";
 
 
 
@@ -33,10 +34,30 @@ export default function SessionButton(props: {idx: number, Session: UserSession,
 
    
             <div className="w-[95%] ml-[13px]">
-            <span className="h-[10px] text-center text-clip text-sm min-h-[10px] text-center text-white"> {props.Session.messages[1] ? props.Session.messages[1].Text : "New Chat" } </span>
+            <span className="h-[10px] text-center text-clip text-sm min-h-[10px] text-center text-white"> {GetChatName(props.Session.messages)} </span>
             <span> </span>
              </div>
 
         </button>
     )
+}
+
+function GetChatName(SessionMessages: MessageProps[]){
+
+    if (SessionMessages.length < 2){
+        return "New Chat"
+    }
+
+    for (let i = 1; i < SessionMessages.length; i++){
+        if (SessionMessages[i].File) continue
+
+        if (SessionMessages[i].Text.length > 60){
+            return SessionMessages[i].Text.substring(0, 60) + "..."
+        }
+
+        return SessionMessages[i].Text
+    }
+    
+   return "New Chat"
+
 }

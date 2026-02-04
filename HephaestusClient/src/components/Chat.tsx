@@ -3,7 +3,7 @@ import { useEffect, useRef } from "react";
 
 
 
-export default function Chat(props: { Messages: MessageProps[] }) {
+export default function CChat(props: { Messages: MessageProps[] }) {
   const bottomRef = useRef<HTMLDivElement | null>(null)
   const scrollRef = useRef<HTMLDivElement | null>(null)
 

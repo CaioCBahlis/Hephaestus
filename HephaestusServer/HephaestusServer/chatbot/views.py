@@ -12,6 +12,7 @@ from chatbot.models import Conversations, Files
 from chatbot.utils import ParseBankStatement
 from chatbot import gemini_config, utils
 from django.core.cache import cache
+from google.genai import types
 
 MIME_BY_EXT = {".pdf":"application/pdf", ".csv":"text/csv"}
 
@@ -87,16 +88,19 @@ def PostUserFiles(request, session_id):
     
     with open(out_path, "rb") as f:
         b64_data = base64.b64encode(f.read()).decode("utf-8")
-
+        
+    file_bytes = out_path.read_bytes()
     mime_type = MIME_BY_EXT.get(ext, "application/octet-stream")
-    model = gemini_config.generate_chatbot_model({"to_be_implemented": "Get_User_Data"})
-    bot_response = model.generate_content([
-        "Summarize this document and ask if the user has any questions.",
-        {"mime_type": mime_type, "data": b64_data},
-    ])
+    client, _ = gemini_config.generate_chatbot_model({"to_be_implemented": "Get_User_Data"})
+    resp = client.models.generate_content(
+        model="gemini-2.0-flash",  # pick your model
+        contents=[
+            "Summarize this document and ask if the user has any questions.",
+            types.Part.from_bytes(data=file_bytes, mime_type=mime_type),
+        ],
+    )
 
-   
-    BotReply = bot_response.candidates[0].content.parts[0].text
+    BotReply = resp.text
     
     return JsonResponse({"reply": BotReply}, status=200)
 

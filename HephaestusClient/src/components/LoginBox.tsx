@@ -3,6 +3,7 @@ import {useState, useEffect} from "react"
 import { useNavigate } from "react-router";
 import {AccountClient, type LoginPayload} from '../api/AccountClient'
 import { useUser } from './UserContextProvider';
+import { toast } from 'react-toastify';
 
 
 
@@ -19,23 +20,20 @@ export default function LoginBox(){
     }, [])
 
     async function handleLogin(Login: LoginPayload) {
-        //TODO: Add Validation On Login
         
         const res = await AccountClient.GetToken(Login)
  
        
-        if (res.status){
+        if (res?.status == 200){
 
             localStorage.setItem("AccessToken", res.data.access)
             localStorage.setItem("RefreshToken", res.data.refresh)
-            
             setUser({email: email})
           
             navigate("/chatbot")
+        }else{
+            toast.error("Invalid Username/Password.")
         }
-
-        
-
 
         return false
     }

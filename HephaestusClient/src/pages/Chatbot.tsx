@@ -98,8 +98,6 @@ export default function Chatbot(){
     return <Navigate to="/login" replace />
     }
 
-
-
     async function handleSubmit(NewMessage: MessageProps){
         
         const ThinkingMessage: MessageProps = {
@@ -109,7 +107,6 @@ export default function Chatbot(){
         }
         
 
-        
         setMessages(x => [...x, NewMessage, ThinkingMessage])
         
         let reply;
@@ -138,8 +135,7 @@ export default function Chatbot(){
         SetFiles(null)
     }
 
- 
-    
+   
     return (
 
         <div className="w-screen h-screen bg-[#1B100E] flex flex-col justify-around">
@@ -164,8 +160,6 @@ export default function Chatbot(){
                         </div>
 
                     </div>
-                    
-                    
                     
                     <button className="relative w-[20px] h-[20px] right-[35px] flex justify-center items-center flex flex-col z-3"
                     onClick={() => {

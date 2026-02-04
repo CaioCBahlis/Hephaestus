@@ -3,6 +3,7 @@ import { ChatbotClient } from "../api/ChatbotClient"
 import type { MessageProps } from "./Message"
 import {useState} from "react"
 import FileModal from "../components/FileModal.tsx"
+import FileLoadedModal from "./FileLoadedModal.tsx"
 
 export default function ChatUserInput(props: {SetQuery: React.Dispatch<React.SetStateAction<string>>,  SetFiles: React.Dispatch<React.SetStateAction<File | null>> }){
     const [OpenFileModal, setModalOpen] = useState<Boolean>(false)
@@ -25,7 +26,8 @@ export default function ChatUserInput(props: {SetQuery: React.Dispatch<React.Set
     
     return (
         
-        <div className="w-screen h-[10vh] bg-[#201810] flex justify-around items-center">
+        <div className="relative w-screen h-[10vh] bg-[#201810] flex justify-around items-center">
+            {FileInput? <FileLoadedModal FileName={FileInput?.name} ResetFile={(x) => setFileInput(x)}/>: <> </>}
             
             
             <button onClick={() => setModalOpen(x => !x)} className={`relative w-[32px] h-[32px] rounded-[100%] bg-[#6D717F] flex justify-center items-center`}> 
