@@ -31,7 +31,7 @@ export default function ChatUserInput(props: {SetQuery: React.Dispatch<React.Set
             
             
             <button onClick={() => setModalOpen(x => !x)} className={`relative w-[32px] h-[32px] rounded-[100%] bg-[#6D717F] flex justify-center items-center`}> 
-                    <FileModal SetFile={setFileInput} IsOpen={OpenFileModal}/>
+                    <FileModal SetFile={setFileInput} IsOpen={OpenFileModal} setModal={(x: Boolean) => setModalOpen(x)}/>
                     <Plus size={25} color={"#211010"} className={`absolute ${OpenFileModal? "rotate-225": "rotate-0"} duration-300`}/> 
             </button>
             

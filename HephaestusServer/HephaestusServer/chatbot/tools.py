@@ -63,8 +63,45 @@ get_spend_summary_tool = models.ChatbotTool(
     ]
 )  
 
+get_prediction = models.ChatbotTool(
+    name="get_prediction",
+    description="Creates a prediction of user's future transactions based on past financial data",
+    params=[
+        models.ToolParam(
+            name="start_date",
+            data_type=int,
+            description="Start date as Unix timestamp (seconds since epoch)",
+            is_required=True
+        ),
+        models.ToolParam(
+            name="end_date",
+            data_type=int,
+            description="End date as Unix timestamp (seconds since epoch)",
+            is_required=True
+        ),
+        models.ToolParam(
+            name="user_id",
+            data_type=str,
+            description="Unique identifier for the user",
+            is_required=True
+        )
+    ],
+    return_type=dict[str, float],
+    return_description="dictionary mapping each spending category to its total amount spent in the period",
+    func=get_spend_summary,
+    constraints="start_date must be less than or equal to end_date. Date range should not exceed 1 year for performance reasons.",
+    usage_examples=[
+        "User asks to predict how much they will spend in the next months",
+        "User wants a linear regression based on their spending habits for the next months",
+        "User asks how much am I going to spend in the next month",
+        "User wants to analyze spending patterns in the next motnhs"
+    ]
+)  
+
+
 # === NEXT TOOL ===
 
 CHATBOT_TOOLS = { 
-    "get_spend_summary": get_spend_summary_tool
+    "get_spend_summary": get_spend_summary_tool,
+    "get_prediction": get_prediction
 }

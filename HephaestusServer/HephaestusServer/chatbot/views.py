@@ -93,7 +93,7 @@ def PostUserFiles(request, session_id):
     mime_type = MIME_BY_EXT.get(ext, "application/octet-stream")
     client, _ = gemini_config.generate_chatbot_model({"to_be_implemented": "Get_User_Data"})
     resp = client.models.generate_content(
-        model="gemini-2.0-flash",  # pick your model
+        model="gemini-2.5-flash",  # pick your model
         contents=[
             "Summarize this document and ask if the user has any questions.",
             types.Part.from_bytes(data=file_bytes, mime_type=mime_type),
