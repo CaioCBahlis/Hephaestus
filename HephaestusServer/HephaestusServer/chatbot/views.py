@@ -1,4 +1,6 @@
 import base64
+import traceback
+from urllib import response
 from django.http import JsonResponse
 from django.conf import settings
 from pathlib import Path
@@ -17,7 +19,6 @@ from google.genai import types
 MIME_BY_EXT = {".pdf":"application/pdf", ".csv":"text/csv"}
 
 # Create your views here.
-
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def post_user_query(request, session_id) -> JsonResponse:
@@ -39,18 +40,24 @@ def post_user_query(request, session_id) -> JsonResponse:
         cache.delete(hash(UserId))
         
         user_data = {}
-        bot_message = utils.get_gemini_response(user_data, conversation_history)
+        try: 
+            bot_message = utils.get_gemini_response(UserId, user_data, conversation_history)
+        except Exception as e:
+            traceback.print_exc() 
+            return JsonResponse({"error": str(e)}, status=500)
         
         Bot_Reply_Json = {"Text": bot_message, "MessageType": "Text", "UserMessage": False}
 
         ConvSession.messages.append(Bot_Reply_Json)
         ConvSession.save()
         
+        
         if not bot_message:
             print(f"Error sending message, got: No bot response")
             return JsonResponse({"error": "No bot response"}, status=500)
         
         return JsonResponse({"reply": bot_message}, status=200) 
+       
     
     except json.JSONDecodeError:
         print(f"Error sending message, got: Invalid JSON")
@@ -65,6 +72,8 @@ def post_user_query(request, session_id) -> JsonResponse:
         ErrorMessage = {"error": f"Internal server error: {e}"}
         print(f"Error sending message, got: {ErrorMessage}")
         return JsonResponse({"error": f"Internal server error: {e}"}, status=500)
+    
+    return JsonResponse({"error": f"Internal server error:"}, status=500)
     
     
 
@@ -83,7 +92,7 @@ def PostUserFiles(request, session_id):
             out.write(chunk)
 
     Files.objects.create(file_name=filename, path=out_path, extension=ext, user_id=request.user)
-    ParseBankStatement(out_path)
+    ParseBankStatement(out_path, id)
 
     
     with open(out_path, "rb") as f:
@@ -91,9 +100,12 @@ def PostUserFiles(request, session_id):
         
     file_bytes = out_path.read_bytes()
     mime_type = MIME_BY_EXT.get(ext, "application/octet-stream")
-    client, _ = gemini_config.generate_chatbot_model({"to_be_implemented": "Get_User_Data"})
+    client, _ = gemini_config.generate_chatbot_model(
+        user_data={"to_be_implemented": "Get_User_Data"},
+        tool_map={} 
+    )
     resp = client.models.generate_content(
-        model="gemini-2.5-flash",  # pick your model
+        model="gemini-2.5-flash",  
         contents=[
             "Summarize this document and ask if the user has any questions.",
             types.Part.from_bytes(data=file_bytes, mime_type=mime_type),

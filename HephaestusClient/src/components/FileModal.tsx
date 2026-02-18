@@ -29,5 +29,4 @@ export default function FileModal(props: {IsOpen: Boolean, SetFile: React.Dispat
 
         </ul>
     )
-
 }

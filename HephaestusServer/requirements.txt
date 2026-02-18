@@ -7,5 +7,6 @@ djangorestframework
 djangorestframework-simplejwt
 celery 
 django-redis
+google-genai
 
 

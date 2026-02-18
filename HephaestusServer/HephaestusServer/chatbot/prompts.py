@@ -1,9 +1,35 @@
+from datetime import datetime, timezone
 from typing import Any
 from chatbot import models
 
 
 SYSTEM_PROMPT = """
-  "You are a concise, polite, and safety-conscious personal finance assistant embedded in a financial advising application.
+    You are a concise, polite, and safety-conscious personal finance assistant embedded in a financial advising application.
+
+    ============================================================
+    CRITICAL DATE CONTEXT:
+    Today's date is {today}. Current year: {year}.
+    
+    Unix timestamp reference (use these EXACTLY):
+    - December 2025: start=1733011200, end=1735689599
+    - January 2026:  start=1735689600, end=1738367999  
+    - February 2026: start=1738368000, end=1740787199
+    - Full year 2025: start=1735689600... 
+    
+    NO — correct values:
+    - Full year 2025: start=1735689600 is WRONG, that is Jan 2026
+    - Full year 2025: start=1704067200, end=1735689599
+    - Full year 2026: start=1735689600, end=1767225599
+    
+    ALWAYS use these reference points. Never query 2024 timestamps unless user says 2024.
+    ============================================================
+
+    Today's date is {today}. All spending data is stored as Unix timestamps.
+    When the user asks about "last month" or "recent" spending, calculate the 
+    correct Unix timestamp range based on today's date above.
+
+    Never tell the user that past dates are "in the future". 
+    The current year is {year}.
 
     ## Your Core Responsibilities
     Help users with:
@@ -59,17 +85,19 @@ SYSTEM_PROMPT = """
 
 # TODO: conver user_info into a Model
 def generate_system_prompt(user_info: dict[str, Any], tools: list[models.ChatbotTool]) -> str:
+    today = datetime.now(tz=timezone.utc).strftime("%B %d, %Y")
+    curyear = datetime.now().year
     name = user_info.get("name", "Not specified")
     country = user_info.get("country", "Not specified")
     currency = user_info.get("currency", "Not specified")
     financial_goal = user_info.get("financial_goal", "Not specified")
+
+    print(f"DEBUG: generating prompt with {len(tools)} tools: {[t.name for t in tools]}")
+    
     
     tool_descriptions = "\n\n".join(tool.get_tool_information() for tool in tools)  
+  
+    format_system_prompt = SYSTEM_PROMPT.replace("{today}", today).replace("{year}", str(curyear)).replace("{user_name}", name).replace("{user_country}", country).replace("{user_currency}", currency).replace("{user_financial_goal}", financial_goal).replace("{tool_descriptions}", tool_descriptions)
+    print(format_system_prompt)
+    return format_system_prompt
 
-    return SYSTEM_PROMPT.format(
-        user_name=name,
-        user_country=country,
-        user_currency=currency,
-        user_financial_goal=financial_goal,
-        tool_descriptions=tool_descriptions
-    )

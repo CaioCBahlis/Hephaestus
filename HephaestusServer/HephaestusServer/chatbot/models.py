@@ -1,6 +1,7 @@
+import inspect
 from django.db import models
 from pydantic import BaseModel
-from typing import Any, Callable
+from typing import Any, Callable, Optional
 import uuid
 
 class Files(models.Model):
@@ -22,6 +23,12 @@ class Conversations(models.Model):
 
 class Transactions(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user_id = models.ForeignKey(
+        "accounts.UserAccount",
+        on_delete=models.CASCADE,
+        null=True, blank=True  
+    )
+
     date = models.IntegerField()
     description = models.CharField(max_length=200)
     amount = models.FloatField()
@@ -47,7 +54,7 @@ class ChatbotTool(BaseModel):
     params: list[ToolParam]
     return_type: Any
     return_description: str
-    func: Callable
+    func: Optional[Callable] = None
     constraints: str
     usage_examples: list[str]
 
@@ -74,5 +81,12 @@ class ChatbotTool(BaseModel):
     def get_tool_func(self) -> Callable:
         return self.func
 
-    def execute_tool_func(self, **kwargs) -> Any:
+    def execute_tool_func(self, user: Any = None, **kwargs) -> Any:
+        if self.func is None:
+            raise ValueError(f"Tool {self.name} has no callable func")
+
+        sig = inspect.signature(self.func)
+        if "user" in sig.parameters and user is not None:
+            kwargs["user"] = user
+
         return self.func(**kwargs)
