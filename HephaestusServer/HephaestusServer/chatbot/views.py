@@ -1,4 +1,7 @@
 import base64
+from datetime import timezone
+import traceback
+from urllib import response
 from django.http import JsonResponse
 from django.conf import settings
 from pathlib import Path
@@ -11,17 +14,20 @@ from rest_framework.permissions import IsAuthenticated
 from chatbot.models import Conversations, Files
 from chatbot.utils import ParseBankStatement
 from chatbot import gemini_config, utils
+from django.core.cache import cache
+from google.genai import types
+from django.shortcuts import render
 
 MIME_BY_EXT = {".pdf":"application/pdf", ".csv":"text/csv"}
 
 # Create your views here.
-
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def post_user_query(request, session_id) -> JsonResponse:
     UserId = request.user.id
     
     try:
+
         data = json.loads(request.body.decode("utf-8"))        
         conversation_history = data.get("ChatContext") 
 
@@ -31,21 +37,38 @@ def post_user_query(request, session_id) -> JsonResponse:
         
         ConvSession = Conversations.objects.get(id=session_id)
         ConvSession.messages = conversation_history
-        ConvSession.save()
+        ConvSession.save() 
+
+        cache.set(hash(str(UserId)+str(session_id)), ConvSession.messages)
+        cache.delete(hash(UserId))
         
         user_data = {}
-        bot_message = utils.get_gemini_response(user_data, conversation_history)
+
+        try: 
+            bot_message = utils.get_gemini_response(UserId, user_data, conversation_history)
+        except Exception as e:
+            traceback.print_exc() 
+            return JsonResponse({"error": str(e)}, status=500)
         
-        Bot_Reply_Json = {"Text": bot_message, "MessageType": "Text", "UserMessage": False}
+        
+        is_chart = isinstance(bot_message, dict) and bot_message.get("type") == "chart"
+
+        Bot_Reply_Json = {
+            "Text": json.dumps(bot_message["data"]) if is_chart else bot_message,
+            "MessageType": "Graph" if is_chart else "Text",
+            "UserMessage": False
+        }
 
         ConvSession.messages.append(Bot_Reply_Json)
         ConvSession.save()
+        
         
         if not bot_message:
             print(f"Error sending message, got: No bot response")
             return JsonResponse({"error": "No bot response"}, status=500)
         
         return JsonResponse({"reply": bot_message}, status=200) 
+       
     
     except json.JSONDecodeError:
         print(f"Error sending message, got: Invalid JSON")
@@ -60,6 +83,8 @@ def post_user_query(request, session_id) -> JsonResponse:
         ErrorMessage = {"error": f"Internal server error: {e}"}
         print(f"Error sending message, got: {ErrorMessage}")
         return JsonResponse({"error": f"Internal server error: {e}"}, status=500)
+    
+    return JsonResponse({"error": f"Internal server error:"}, status=500)
     
     
 
@@ -78,20 +103,27 @@ def PostUserFiles(request, session_id):
             out.write(chunk)
 
     Files.objects.create(file_name=filename, path=out_path, extension=ext, user_id=request.user)
-    ParseBankStatement(out_path)
+    ParseBankStatement(out_path, id)
 
     
     with open(out_path, "rb") as f:
         b64_data = base64.b64encode(f.read()).decode("utf-8")
-
+        
+    file_bytes = out_path.read_bytes()
     mime_type = MIME_BY_EXT.get(ext, "application/octet-stream")
-    model = gemini_config.generate_chatbot_model({"to_be_implemented": "Get_User_Data"})
-    bot_response = model.generate_content([
-        "Summarize this document and ask if the user has any questions.",
-        {"mime_type": mime_type, "data": b64_data},
-    ])
-   
-    BotReply = bot_response.candidates[0].content.parts[0].text
+    client, _ = gemini_config.generate_chatbot_model(
+        user_data={"to_be_implemented": "Get_User_Data"},
+        tool_map={} 
+    )
+    resp = client.models.generate_content(
+        model="gemini-2.5-flash",  
+        contents=[
+            "Summarize this document and ask if the user has any questions.",
+            types.Part.from_bytes(data=file_bytes, mime_type=mime_type),
+        ],
+    )
+
+    BotReply = resp.text
     
     return JsonResponse({"reply": BotReply}, status=200)
 
@@ -111,24 +143,44 @@ def get_session_id(request):
 def get_user_sessions(request):
     UserId = request.user.id
 
-    UserConversations = Conversations.objects.filter(user_id_id=request.user)
+    """"
+    redis_key = f"{hash(UserId)}"
+    ans = cache.get(redis_key)
+    if ans is not None:
+        print('UserSessions Cache Hit')
+        return JsonResponse({"Sessions": ans}, status=200)
+    """
+    
+
+    UserConversations = Conversations.objects.filter(user_id_id=request.user).order_by("updated_at")
    
 
     MyConversation = []
     for Conversation in UserConversations[::-1]: #Newest Conversations First
         ConversationObj = {"id": Conversation.id, "name": Conversation.name, "messages": Conversation.messages}
         MyConversation.append(ConversationObj)
-
+    
+    #ans = cache.set(redis_key, MyConversation)
 
     return JsonResponse({"Sessions": MyConversation}, status=200)
+
+
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def get_session_context(request, session_id):
     UserId = request.user.id
 
+    """
+    ans = cache.get(hash(str(UserId)+str(session_id)))
+    if ans is not None:
+        print("Session Context Cache Hit")
+        return JsonResponse({"messages": ans}, status=200)
+    """
+
+
     UserConversations = Conversations.objects.get(id=session_id, user_id_id=request.user)
-    print(UserConversations)
+    cache.set(hash(str(UserId)+str(session_id)), UserConversations.messages)
 
 
     return JsonResponse({"messages": UserConversations.messages}, status=200)

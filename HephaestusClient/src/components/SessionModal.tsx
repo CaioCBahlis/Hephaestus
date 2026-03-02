@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { ChatbotClient } from "../api/ChatbotClient"
 import type { MessageProps } from "./Message"
-import { CircleFadingPlus, Flame, History } from "lucide-react"
+import { CircleFadingPlus, Flame} from "lucide-react"
 import SessionButton from "./SessionButton"
 import { useNavigate } from "react-router"
 
@@ -14,14 +14,26 @@ export type UserSession = {
 }
 
 
-export default function SessionModal(props: {IsMenuOpen: boolean, setOpen: React.Dispatch<React.SetStateAction<boolean>>}) {
+export default function SessionModal(props: {IsMenuOpen: boolean, setOpen: React.Dispatch<React.SetStateAction<boolean>>, nonce: number}) {
     const [Sessions, setSessions] = useState<UserSession[]>([])
     const navigate = useNavigate()
 
 
     useEffect(() => {
-        ChatbotClient.GetUserSessions().then(res => {setSessions(res.data.filter((x: UserSession) => x.messages.length > 1));});
-}, []);
+        const loadSessions = async () => {
+            try {
+            const res = await ChatbotClient.GetUserSessions();
+            setSessions(
+                res.data.filter((x: UserSession) => x.messages.length > 1)
+            );
+            } catch (error) {
+            console.error("Failed to load sessions:", error);
+            }
+        };
+
+        loadSessions();
+        
+    }, [props.nonce]);
 
 
 

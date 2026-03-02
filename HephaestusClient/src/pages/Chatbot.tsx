@@ -1,4 +1,4 @@
-import {Anvil, Menu} from 'lucide-react'
+import {Anvil} from 'lucide-react'
 import {useEffect, useState} from "react"
 import Chat from '../components/Chat'
 import ChatUserInput from '../components/ChatUserInput'
@@ -27,6 +27,7 @@ export default function Chatbot(){
     const [UserQuery, setQuery] = useState<string>("")
     const [File, SetFiles] = useState<File | null>(null)
     const [IsMenuOpen, setMenuOpen] = useState<boolean>(false)
+    const [Nonce, setNonce] = useState<number>(Date.now())
     const {sessionId} = useParams();
     const navigate = useNavigate()
 
@@ -98,8 +99,6 @@ export default function Chatbot(){
     return <Navigate to="/login" replace />
     }
 
-
-
     async function handleSubmit(NewMessage: MessageProps){
         
         const ThinkingMessage: MessageProps = {
@@ -109,7 +108,6 @@ export default function Chatbot(){
         }
         
 
-        
         setMessages(x => [...x, NewMessage, ThinkingMessage])
         
         let reply;
@@ -129,21 +127,28 @@ export default function Chatbot(){
         if (!reply.ok) {
             BotResponse.Text = "An error occurred. Please try again later."
         } else {
-            BotResponse.Text = reply.data["reply"]
+            const replyData = reply.data["reply"]
+            
+            if (replyData?.type === "chart") {
+                BotResponse.Text = JSON.stringify(replyData.data)
+                BotResponse.MessageType = "Graph"
+            } else {
+                BotResponse.Text = replyData
+            }
         }
         
-        setMessages(x => [...Messages, NewMessage, BotResponse])
+        setMessages(_ => [...Messages, NewMessage, BotResponse])
 
+        setNonce(Date.now())
         setQuery("")
         SetFiles(null)
     }
 
- 
-    
+   
     return (
 
         <div className="w-screen h-screen bg-[#1B100E] flex flex-col justify-around">
-            <SessionModal IsMenuOpen={IsMenuOpen} setOpen={setMenuOpen}/>
+            <SessionModal IsMenuOpen={IsMenuOpen} setOpen={setMenuOpen} nonce={Nonce}/>
 
             <div className="w-screen h-[10vh] bg-[#201810] flex justify-between items-center">
                 
@@ -164,8 +169,6 @@ export default function Chatbot(){
                         </div>
 
                     </div>
-                    
-                    
                     
                     <button className="relative w-[20px] h-[20px] right-[35px] flex justify-center items-center flex flex-col z-3"
                     onClick={() => {

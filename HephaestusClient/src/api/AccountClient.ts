@@ -1,4 +1,6 @@
+import { toast } from "react-toastify"
 import {client} from "./client.ts"
+
 
 
 export type LoginPayload = {
@@ -22,8 +24,6 @@ export type Tokens = {
     access: string
 }
 
-
-
 export const AccountClient = {
 
     getCSRF: async () => {
@@ -33,14 +33,30 @@ export const AccountClient = {
 
     GetToken : async (body: LoginPayload) => {
         
-       const res = await client.post<Tokens>("/accounts/token/", body)
-       return res
+        try{
+            const res = await client.post<Tokens>("/accounts/token/", body)
+            return res
+        } catch (e){
+            return undefined
+        }
 
     },
 
     register: async (body: RegisterPayload) => {
-        const res = await client.post<Response>("/accounts/create_account/", body)
-        return res.data
+
+            try {
+          
+                const res = await client.post<Response>("/accounts/create_account/", body)
+                return res.data
+
+            } catch (e: any){
+                
+                console.log(e)
+                toast.error(`Fail to Create an Account, got ${e}`)
+                return undefined
+            }
+
+    
     },
 
     AuthMe: async () => {

@@ -1,7 +1,7 @@
 import { Paperclip } from "lucide-react"
 import {useRef} from "react"
 
-export default function FileModal(props: {IsOpen: Boolean, SetFile: React.Dispatch<React.SetStateAction<File | null>>}){
+export default function FileModal(props: {IsOpen: Boolean, SetFile: React.Dispatch<React.SetStateAction<File | null>>, setModal: any}){
     const inputRef = useRef<HTMLInputElement>(null);
 
     if (!props.IsOpen){
@@ -21,6 +21,7 @@ export default function FileModal(props: {IsOpen: Boolean, SetFile: React.Dispat
                        onChange={(e) => {
                         const MyFile: File | null = e.currentTarget.files?.[0] ?? null;
                         props.SetFile(MyFile)
+                        props.setModal(false)
                     }}
                     ref={inputRef}
                 />
@@ -28,5 +29,4 @@ export default function FileModal(props: {IsOpen: Boolean, SetFile: React.Dispat
 
         </ul>
     )
-
 }

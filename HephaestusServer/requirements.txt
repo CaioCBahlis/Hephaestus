@@ -5,4 +5,8 @@ dotenv
 psycopg
 djangorestframework 
 djangorestframework-simplejwt
+celery 
+django-redis
+google-genai
+
 

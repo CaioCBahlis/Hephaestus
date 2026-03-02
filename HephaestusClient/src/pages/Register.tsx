@@ -1,13 +1,10 @@
 
 
 import {Anvil} from 'lucide-react'
-import { useState } from 'react'
 import RegisterBox from '../components/RegisterBox'
 
 
 export default function Register(){
-    const [name, setName] = useState<string>("")
-    const [password, setPassword] = useState<string>("")
 
     return (
         <div className="w-screen h-screen bg-[#1B100E] flex flex-col justify-start items-center">
