@@ -27,6 +27,7 @@ export default function Chatbot(){
     const [UserQuery, setQuery] = useState<string>("")
     const [File, SetFiles] = useState<File | null>(null)
     const [IsMenuOpen, setMenuOpen] = useState<boolean>(false)
+    const [Nonce, setNonce] = useState<number>(Date.now())
     const {sessionId} = useParams();
     const navigate = useNavigate()
 
@@ -138,6 +139,7 @@ export default function Chatbot(){
         
         setMessages(_ => [...Messages, NewMessage, BotResponse])
 
+        setNonce(Date.now())
         setQuery("")
         SetFiles(null)
     }
@@ -146,7 +148,7 @@ export default function Chatbot(){
     return (
 
         <div className="w-screen h-screen bg-[#1B100E] flex flex-col justify-around">
-            <SessionModal IsMenuOpen={IsMenuOpen} setOpen={setMenuOpen}/>
+            <SessionModal IsMenuOpen={IsMenuOpen} setOpen={setMenuOpen} nonce={Nonce}/>
 
             <div className="w-screen h-[10vh] bg-[#201810] flex justify-between items-center">
                 

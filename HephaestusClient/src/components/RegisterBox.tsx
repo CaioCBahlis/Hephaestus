@@ -46,7 +46,7 @@ export default function RegisterBox(){
 
         const res = await AccountClient.register(payload)
 
-        if (res.ok){
+        if (res?.ok){
             const res = await AccountClient.GetToken(TokenPayload)
 
             localStorage.setItem("AccessToken", res!.data.access)
@@ -55,6 +55,7 @@ export default function RegisterBox(){
             setUser({email: Email})
             navigate("/chatbot")
         }
+        
         
     }
 

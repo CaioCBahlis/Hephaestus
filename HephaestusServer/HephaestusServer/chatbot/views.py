@@ -1,4 +1,5 @@
 import base64
+from datetime import timezone
 import traceback
 from urllib import response
 from django.http import JsonResponse
@@ -26,6 +27,7 @@ def post_user_query(request, session_id) -> JsonResponse:
     UserId = request.user.id
     
     try:
+
         data = json.loads(request.body.decode("utf-8"))        
         conversation_history = data.get("ChatContext") 
 
@@ -41,6 +43,7 @@ def post_user_query(request, session_id) -> JsonResponse:
         cache.delete(hash(UserId))
         
         user_data = {}
+
         try: 
             bot_message = utils.get_gemini_response(UserId, user_data, conversation_history)
         except Exception as e:
@@ -55,7 +58,6 @@ def post_user_query(request, session_id) -> JsonResponse:
             "MessageType": "Graph" if is_chart else "Text",
             "UserMessage": False
         }
-
 
         ConvSession.messages.append(Bot_Reply_Json)
         ConvSession.save()
@@ -141,14 +143,16 @@ def get_session_id(request):
 def get_user_sessions(request):
     UserId = request.user.id
 
+    """"
     redis_key = f"{hash(UserId)}"
     ans = cache.get(redis_key)
     if ans is not None:
         print('UserSessions Cache Hit')
         return JsonResponse({"Sessions": ans}, status=200)
+    """
     
 
-    UserConversations = Conversations.objects.filter(user_id_id=request.user)
+    UserConversations = Conversations.objects.filter(user_id_id=request.user).order_by("updated_at")
    
 
     MyConversation = []
@@ -156,7 +160,7 @@ def get_user_sessions(request):
         ConversationObj = {"id": Conversation.id, "name": Conversation.name, "messages": Conversation.messages}
         MyConversation.append(ConversationObj)
     
-    ans = cache.set(redis_key, MyConversation)
+    #ans = cache.set(redis_key, MyConversation)
 
     return JsonResponse({"Sessions": MyConversation}, status=200)
 
@@ -167,10 +171,12 @@ def get_user_sessions(request):
 def get_session_context(request, session_id):
     UserId = request.user.id
 
+    """
     ans = cache.get(hash(str(UserId)+str(session_id)))
     if ans is not None:
         print("Session Context Cache Hit")
         return JsonResponse({"messages": ans}, status=200)
+    """
 
 
     UserConversations = Conversations.objects.get(id=session_id, user_id_id=request.user)

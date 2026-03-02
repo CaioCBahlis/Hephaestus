@@ -14,14 +14,26 @@ export type UserSession = {
 }
 
 
-export default function SessionModal(props: {IsMenuOpen: boolean, setOpen: React.Dispatch<React.SetStateAction<boolean>>}) {
+export default function SessionModal(props: {IsMenuOpen: boolean, setOpen: React.Dispatch<React.SetStateAction<boolean>>, nonce: number}) {
     const [Sessions, setSessions] = useState<UserSession[]>([])
     const navigate = useNavigate()
 
 
     useEffect(() => {
-        ChatbotClient.GetUserSessions().then(res => {setSessions(res.data.filter((x: UserSession) => x.messages.length > 1));});
-}, []);
+        const loadSessions = async () => {
+            try {
+            const res = await ChatbotClient.GetUserSessions();
+            setSessions(
+                res.data.filter((x: UserSession) => x.messages.length > 1)
+            );
+            } catch (error) {
+            console.error("Failed to load sessions:", error);
+            }
+        };
+
+        loadSessions();
+        
+    }, [props.nonce]);
 
 
 

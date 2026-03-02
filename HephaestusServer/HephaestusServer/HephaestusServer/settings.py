@@ -203,10 +203,3 @@ STATICFILES_DIRS = [
 TEMPLATES[0]["DIRS"] = [
     FRONTEND_DIST,
 ]
-
-print("BASE_DIR =", BASE_DIR)
-print("PROJECT_ROOT =", PROJECT_ROOT)
-print("FRONTEND_DIST =", FRONTEND_DIST)
-print("DIST EXISTS =", FRONTEND_DIST.exists())
-print("JS EXISTS =", (FRONTEND_DIST / "assets" / "index-BdBSFEFN.js").exists())
-print("CSS EXISTS =", (FRONTEND_DIST / "assets" / "index-C2J2aEZd.css").exists())

@@ -15,10 +15,10 @@ class Files(models.Model):
 
 class Conversations(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-
     name = models.CharField(max_length=20)
     messages = models.JSONField()
     user_id = models.ForeignKey("accounts.UserAccount", on_delete=models.CASCADE, blank=False)
+    updated_at = models.DateTimeField(auto_now=True)
 
 
 class Transactions(models.Model):

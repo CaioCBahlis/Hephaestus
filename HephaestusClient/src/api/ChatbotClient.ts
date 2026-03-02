@@ -30,7 +30,7 @@ export const ChatbotClient =  {
 
             const Token = localStorage.getItem("AccessToken")
 
-            const res = await client.post(`chatbot/query/${SessionId}`,
+            const res = await client.post(`api/chatbot/query/${SessionId}`,
                 ChatContext,
                 {
                  withCredentials: true,
@@ -58,7 +58,7 @@ export const ChatbotClient =  {
             Payload.append("File", Message.File)
             const Token = localStorage.getItem("AccessToken")
 
-            const res = await client.post(`chatbot/file_upload/${SessionId}`, 
+            const res = await client.post(`api/chatbot/file_upload/${SessionId}`, 
                 Message, 
                 {
                     withCredentials: true, 
@@ -82,7 +82,7 @@ export const ChatbotClient =  {
         try{
 
             const Token = localStorage.getItem("AccessToken")
-            const res = await client.get(`chatbot/get_session_id/`, {
+            const res = await client.get(`api/chatbot/get_session_id/`, {
                     withCredentials: true, 
                     headers: { Authorization: `Bearer ${Token}`, "Content-Type": "multipart/form-data" }
             })
@@ -100,7 +100,7 @@ export const ChatbotClient =  {
 
             const Token = localStorage.getItem("AccessToken")
 
-            const res = await client.get(`chatbot/get_session_context/${SessionId}`, {
+            const res = await client.get(`api/chatbot/get_session_context/${SessionId}`, {
                     withCredentials: true, 
                     headers: { Authorization: `Bearer ${Token}`, "Content-Type": "multipart/form-data" }
             })
@@ -119,7 +119,7 @@ export const ChatbotClient =  {
 
             const Token = localStorage.getItem("AccessToken")
 
-            const res = await client.get(`chatbot/get_user_sessions`, {
+            const res = await client.get(`api/chatbot/get_user_sessions`, {
                     withCredentials: true, 
                     headers: { Authorization: `Bearer ${Token}`, "Content-Type": "multipart/form-data" }
             })
