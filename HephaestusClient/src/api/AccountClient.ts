@@ -1,4 +1,3 @@
-import { toast } from "react-toastify"
 import {client} from "./client.ts"
 
 
@@ -22,8 +21,6 @@ export type Tokens = {
     refresh: string
     access: string
 }
-
-
 
 export const AccountClient = {
 

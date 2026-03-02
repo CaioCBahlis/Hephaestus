@@ -6,12 +6,10 @@ import Login from './pages/Login';
 import Chatbot from './pages/Chatbot';
 import Register from './pages/Register';
 import { Flip, ToastContainer} from 'react-toastify';
-import { createContext } from 'react';
 import UserContextProvider from './components/UserContextProvider';
 
-
-
 createRoot(document.getElementById('root')!).render(
+   
 
     <BrowserRouter>
       <ToastContainer

@@ -50,12 +50,15 @@ def get_gemini_response(user_id, user_data: dict[str, Any], conversation_history
             tool = tool_map[call.name]
             result = tool.func(**call.args)
 
-            tool_responses.append(
-                types.Part.from_function_response(
-                    name=call.name,
-                    response={"result": result}
-                )
+        if call.name == "get_prediction_chart":
+            return {"type": "chart", "data": result}
+
+        tool_responses.append(
+            types.Part.from_function_response(
+                name=call.name,
+                response={"result": result}
             )
+        )
 
         current_input = tool_responses
 
@@ -88,7 +91,7 @@ def ParsePseudoStatement(FilePath, user_id):
         with open(FilePath, "r") as f:
             csv_reader = csv.DictReader(f)
             for row in csv_reader:
-                    date=helper_funcs.date_to_int(row["Date"].strip())
+                    date = helper_funcs.date_to_int(row["Date"].strip(), default_year=2025)
                     amount=float(row["Amount"].strip())
                     category=row["Category"].strip()
                     balance=float(row["Running Balance"].strip())

@@ -15,6 +15,7 @@ from chatbot.utils import ParseBankStatement
 from chatbot import gemini_config, utils
 from django.core.cache import cache
 from google.genai import types
+from django.shortcuts import render
 
 MIME_BY_EXT = {".pdf":"application/pdf", ".csv":"text/csv"}
 
@@ -46,7 +47,15 @@ def post_user_query(request, session_id) -> JsonResponse:
             traceback.print_exc() 
             return JsonResponse({"error": str(e)}, status=500)
         
-        Bot_Reply_Json = {"Text": bot_message, "MessageType": "Text", "UserMessage": False}
+        
+        is_chart = isinstance(bot_message, dict) and bot_message.get("type") == "chart"
+
+        Bot_Reply_Json = {
+            "Text": json.dumps(bot_message["data"]) if is_chart else bot_message,
+            "MessageType": "Graph" if is_chart else "Text",
+            "UserMessage": False
+        }
+
 
         ConvSession.messages.append(Bot_Reply_Json)
         ConvSession.save()

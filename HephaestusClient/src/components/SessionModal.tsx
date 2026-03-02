@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { ChatbotClient } from "../api/ChatbotClient"
 import type { MessageProps } from "./Message"
-import { CircleFadingPlus, Flame, History } from "lucide-react"
+import { CircleFadingPlus, Flame} from "lucide-react"
 import SessionButton from "./SessionButton"
 import { useNavigate } from "react-router"
 

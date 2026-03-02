@@ -21,6 +21,7 @@ def get_date_range_wrapper(user_id, month: int, year: int) -> dict:
         "description": f"{start.strftime('%B %Y')}"
     }
 
+
 def _to_int_ts(x: Union[int, str]) -> int:
     if isinstance(x, int):
         return x
@@ -45,9 +46,7 @@ def get_spend_summary_wrapper(user_id, start_date: int, end_date: int) -> dict[s
     start_date = _to_int_ts(start_date)
     end_date = _to_int_ts(end_date)
 
-    print(f"DEBUG: user_id={user_id}, start={start_date}, end={end_date}")
-    print(f"DEBUG: start={datetime.fromtimestamp(start_date, tz=timezone.utc)}, end={datetime.fromtimestamp(end_date, tz=timezone.utc)}")
-    
+ 
 
     if start_date > end_date:
         raise ValueError("start_date must be <= end_date")
@@ -62,8 +61,6 @@ def get_spend_summary_wrapper(user_id, start_date: int, end_date: int) -> dict[s
 
     all_txns = models.Transactions.objects.filter(user_id_id=user_id)
 
-    print(f"DEBUG: query count={qs.count()}")
-    print(f"DEBUG: total transactions for user={all_txns.count()}")
 
     totals = defaultdict(Decimal)
     for category, amount in qs:
@@ -128,7 +125,7 @@ def get_prediction_wrapper(user_id, start_date: int, end_date: int) -> dict[str,
     start_dt = _ts_to_dt(start_date)
     end_dt = _ts_to_dt(end_date)
 
-    # look back same-length window immediately before start_date
+
     hist_end_ts = start_date - 1
     window_secs = end_date - start_date
     hist_start_ts = hist_end_ts - window_secs
@@ -160,6 +157,24 @@ def get_prediction_wrapper(user_id, start_date: int, end_date: int) -> dict[str,
 
     return result
 
+get_prediction_chart_tool = models.ChatbotTool(
+    name="get_prediction_chart",
+    description="Returns monthly spending predictions as a raw dictionary for chart visualization. Use this when the user wants to SEE a graph or chart of their predicted spending.",
+    params=[
+        models.ToolParam(name="start_date", data_type=int, description="Start date as Unix timestamp", is_required=True),
+        models.ToolParam(name="end_date", data_type=int, description="End date as Unix timestamp", is_required=True),
+    ],
+    func=None,
+    return_type=dict,
+    return_description="Raw dictionary mapping YYYY-MM to predicted spend. No explanation, just data.",
+    constraints="start_date must be <= end_date.",
+    usage_examples=[
+        "User says 'show me a graph of my predicted spending'",
+        "User says 'visualize my forecast'",
+        "User asks for a chart of future spending",
+    ]
+)
+
 get_prediction_tool = models.ChatbotTool(
     name="get_prediction",
     description="Predicts the user's total spending per month for a future date range using recent history as a baseline forecast.",
@@ -188,6 +203,7 @@ get_prediction_tool = models.ChatbotTool(
 )
 
 def build_tools(user_id):
+
     def make_spend_summary(start_date: int, end_date: int) -> dict:
         """Retrieves a summary of the user's spending within a date range.
         
@@ -205,6 +221,19 @@ def build_tools(user_id):
             end_date: End date as Unix timestamp (seconds since epoch)
         """
         return get_prediction_wrapper(user_id, start_date, end_date)
+    
+    def make_prediction_chart(start_date: int, end_date: int) -> dict:
+        """Returns monthly spending predictions as raw data for chart rendering.
+        
+        Args:
+            start_date: Start date as Unix timestamp (seconds since epoch)
+            end_date: End date as Unix timestamp (seconds since epoch)
+        """
+        return get_prediction_wrapper(user_id, start_date, end_date)
+
+    make_prediction_chart.__name__ = "get_prediction_chart"
+    chart = get_prediction_chart_tool.model_copy(deep=True)
+    chart.func = make_prediction_chart
 
     make_spend_summary.__name__ = "get_spend_summary"
     make_prediction.__name__ = "get_prediction"
@@ -228,7 +257,7 @@ def build_tools(user_id):
     date_range = get_date_range_tool.model_copy(deep=True)
     date_range.func = make_date_range
 
-    return {"get_spend_summary": spend, "get_prediction": pred, "get_date_range": date_range}
+    return {"get_spend_summary": spend, "get_prediction": pred, "get_prediction_chart": chart, "get_date_range": date_range}
 
 CHATBOT_TOOLS = { 
     "get_spend_summary": get_spend_summary_tool,

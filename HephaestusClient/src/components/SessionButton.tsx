@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import type { UserSession } from "./SessionModal";
-import { Navigate, useNavigate } from "react-router";
+import {useNavigate } from "react-router";
 import type { MessageProps } from "./Message";
 
 
@@ -8,7 +8,7 @@ import type { MessageProps } from "./Message";
 export default function SessionButton(props: {idx: number, Session: UserSession, setOpen: React.Dispatch<React.SetStateAction<boolean>>}){
     const navigate = useNavigate()
 
-    function handleKeydown(e: React.KeyboardEvent){
+    function handleKeydown(_: React.KeyboardEvent){
 
 
 

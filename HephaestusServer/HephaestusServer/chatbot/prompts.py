@@ -92,12 +92,12 @@ def generate_system_prompt(user_info: dict[str, Any], tools: list[models.Chatbot
     currency = user_info.get("currency", "Not specified")
     financial_goal = user_info.get("financial_goal", "Not specified")
 
-    print(f"DEBUG: generating prompt with {len(tools)} tools: {[t.name for t in tools]}")
+
     
     
     tool_descriptions = "\n\n".join(tool.get_tool_information() for tool in tools)  
   
     format_system_prompt = SYSTEM_PROMPT.replace("{today}", today).replace("{year}", str(curyear)).replace("{user_name}", name).replace("{user_country}", country).replace("{user_currency}", currency).replace("{user_financial_goal}", financial_goal).replace("{tool_descriptions}", tool_descriptions)
-    print(format_system_prompt)
+
     return format_system_prompt
 

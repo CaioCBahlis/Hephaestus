@@ -2,9 +2,9 @@ import BotReply from "./BotReply"
 import FileMessage from "./FileMessage"
 import TextMessage from "./TextMessage"
 import ThinkingMessage from "./ThinkingMessage"
-import Hephaestus from '../assets/thetis-and-hephaistos-1200-cropped.webp'
+import Graph from "./Graph"
 
-type MessageType = "Text" | "File" | "Thinking"
+type MessageType = "Text" | "File" | "Thinking" | "Graph"
 
 export type MessageProps = {
     Text: string
@@ -28,6 +28,8 @@ const ParseMessageType = (Message: MessageProps) => {
                 return <BotReply Text={Message.Text}/>
             case "Thinking":
                 return <ThinkingMessage/>
+            case "Graph":
+                return <Graph GraphData={Message.Text}/>
         }
     }
 
@@ -36,7 +38,7 @@ const ParseMessageType = (Message: MessageProps) => {
 
 export default function Message(props: {Message: MessageProps}){
 
-    
+
      return (
 
         <div className={`${props.Message.UserMessage ? "justify-end mr-[30px]" : "justify-start ml-[30px]"} w-[100%] min-h-[50px] h-auto flex`}>

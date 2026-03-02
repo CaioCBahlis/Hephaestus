@@ -29,10 +29,8 @@ SECRET_KEY = "django-insecure-i8&b5&fg_al1o76py%a%^o^vj4yi8*^+5epv-0&ijdc-_-3cnk
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
-
-# Application definition
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -44,6 +42,7 @@ INSTALLED_APPS = [
     "corsheaders",
     "accounts",
     "chatbot",
+    "core",
     "tooling",
     "rest_framework",
     "rest_framework_simplejwt",
@@ -85,9 +84,11 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
 ]
+
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
+    "https://*.ngrok-free.app",
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -183,5 +184,29 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = "static/"
 
+BASE_DIR = Path(__file__).resolve().parent.parent
+# /Users/caiobahlis/Hephaestus/HephaestusServer/HephaestusServer
+
+PROJECT_ROOT = BASE_DIR.parent.parent
+# /Users/caiobahlis/Hephaestus
+
+FRONTEND_DIST = PROJECT_ROOT / "HephaestusClient" / "dist"
+
+STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+STATICFILES_DIRS = [
+    FRONTEND_DIST,
+]
+
+TEMPLATES[0]["DIRS"] = [
+    FRONTEND_DIST,
+]
+
+print("BASE_DIR =", BASE_DIR)
+print("PROJECT_ROOT =", PROJECT_ROOT)
+print("FRONTEND_DIST =", FRONTEND_DIST)
+print("DIST EXISTS =", FRONTEND_DIST.exists())
+print("JS EXISTS =", (FRONTEND_DIST / "assets" / "index-BdBSFEFN.js").exists())
+print("CSS EXISTS =", (FRONTEND_DIST / "assets" / "index-C2J2aEZd.css").exists())

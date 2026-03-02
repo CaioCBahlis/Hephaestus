@@ -1,6 +1,4 @@
 import {Plus, SendHorizontal} from "lucide-react"
-import { ChatbotClient } from "../api/ChatbotClient"
-import type { MessageProps } from "./Message"
 import {useState} from "react"
 import FileModal from "../components/FileModal.tsx"
 import FileLoadedModal from "./FileLoadedModal.tsx"
@@ -39,7 +37,7 @@ export default function ChatUserInput(props: {SetQuery: React.Dispatch<React.Set
                     <input value={UserInput} type="text" onChange={(x) => setUserInput(x.currentTarget.value)} placeholder="Wonder. Question. Defy." className="primary-font secondary-color w-full h-full pl-4 text-sm"/>
             </form>
 
-             <button onClick={(e) => handleSubmit()} className="w-[42px] h-[42px] rounded-[100%] bg-[#F47B25] flex justify-center items-center"> 
+             <button onClick={(_) => handleSubmit()} className="w-[42px] h-[42px] rounded-[100%] bg-[#F47B25] flex justify-center items-center"> 
                     <SendHorizontal color="white"/> 
             </button>
 

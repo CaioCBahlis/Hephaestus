@@ -1,6 +1,7 @@
 from django.urls import path
 from . import views
 
+
 # TODO: change name to more descriptive
 urlpatterns = [
     path("query/<uuid:session_id>", views.post_user_query), # POST
