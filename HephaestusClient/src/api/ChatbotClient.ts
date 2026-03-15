@@ -131,6 +131,27 @@ export const ChatbotClient =  {
             return {ok:false, status: err.response?.status, data: err}
         }
 
-    }
+    },
+
+    PostSaveConversationState: async (ChatContext: ChatHistory, SessionId: string) => {
+
+        try{
+
+            const Token = localStorage.getItem("AccessToken")
+            const res = await client.post(`api/chatbot/post_message_feedback/${SessionId}`,
+                    ChatContext, {
+                    withCredentials: true, 
+                    headers: { Authorization: `Bearer ${Token}`}
+            })
+            return {ok: true, status: res.status}
+
+        }catch (err: any){
+
+            console.log("Failed to save conversation state")
+            return {ok:false, status: err.response?.status, data: err}
+        }
+
+    },
+
 
 }

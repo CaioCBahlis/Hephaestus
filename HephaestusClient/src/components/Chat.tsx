@@ -1,11 +1,15 @@
+import { ChatbotClient } from "../api/ChatbotClient.ts";
 import Message, { type MessageProps } from "../components/Message.tsx"
-import { useEffect, useRef } from "react";
+import {useContext, useEffect, useRef, useState } from "react";
+import { UserSessionContext, type ChatHistory } from "../pages/Chatbot.tsx";
 
 
 
-export default function Chat(props: { Messages: MessageProps[] }) {
+export default function Chat(props: { Messages: MessageProps[]}) {
   const bottomRef = useRef<HTMLDivElement | null>(null)
   const scrollRef = useRef<HTMLDivElement | null>(null)
+  const sessionId = useContext(UserSessionContext)
+  const [feedbackNonce, setFeedbackNonce] = useState(Date.now())
 
   const ScrollTreshold = () => {
     const sentinel = scrollRef.current
@@ -14,6 +18,12 @@ export default function Chat(props: { Messages: MessageProps[] }) {
 
     return (sentinel.scrollHeight - sentinel.scrollTop - sentinel.clientHeight) < threshold;
   }
+
+  useEffect(() => {
+
+        ChatbotClient.PostSaveConversationState({ChatContext: props.Messages} as ChatHistory, sessionId)
+
+    }, [feedbackNonce])
 
   useEffect(() => {
 
@@ -28,7 +38,7 @@ export default function Chat(props: { Messages: MessageProps[] }) {
 
       <div className="flex flex-col items-center gap-y-[40px]">
         {props.Messages.map((x, idx) => (
-          <Message key={idx} Message={x} />
+          <Message key={idx} Message={x} FeedbackNonce={() => setFeedbackNonce(Date.now())}/>
         ))}
         <div ref={bottomRef}/>
       </div>

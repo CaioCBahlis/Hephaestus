@@ -1,5 +1,5 @@
 import {Anvil} from 'lucide-react'
-import {useEffect, useState} from "react"
+import {createContext, useContext, useEffect, useState} from "react"
 import Chat from '../components/Chat'
 import ChatUserInput from '../components/ChatUserInput'
 import type { MessageProps } from '../components/Message'
@@ -14,13 +14,14 @@ import SessionModal from '../components/SessionModal'
 const InitialMessage: MessageProps = {
             Text: "Hello, I'm Hephaestus AI, your personal financial Advisor. How can I help you today?", 
             UserMessage: false,
-            MessageType: "Text"
+            MessageType: "Text"          
 }
 
 export type ChatHistory = {
     ChatContext: MessageProps[]
 }
 
+export const UserSessionContext = createContext<string>("");
 
 export default function Chatbot(){
     const [Messages, setMessages] = useState<MessageProps[]>([InitialMessage])
@@ -29,6 +30,7 @@ export default function Chatbot(){
     const [IsMenuOpen, setMenuOpen] = useState<boolean>(false)
     const [Nonce, setNonce] = useState<number>(Date.now())
     const {sessionId} = useParams();
+
     const navigate = useNavigate()
 
     useEffect(() => {
@@ -48,8 +50,7 @@ export default function Chatbot(){
                     throw new Error("Failed to Get Session Context")
                 
                 }
-
-                console.log(x.data)
+                
                 setMessages(x.data)
             })
 
@@ -182,8 +183,10 @@ export default function Chatbot(){
                     </button>
 
             </div>
-
-            <Chat Messages={Messages}/> 
+            
+            <UserSessionContext value={sessionId!}>
+                <Chat Messages={Messages}/> 
+            </UserSessionContext> 
 
             <ChatUserInput SetQuery={setQuery} SetFiles={SetFiles} /> 
 
