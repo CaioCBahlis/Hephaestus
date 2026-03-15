@@ -8,5 +8,6 @@ urlpatterns = [
     path("file_upload/<uuid:session_id>", views.PostUserFiles),
     path("get_session_id/", views.get_session_id),
     path("get_user_sessions", views.get_user_sessions),
-    path("get_session_context/<uuid:session_id>", views.get_session_context)
+    path("get_session_context/<uuid:session_id>", views.get_session_context),
+    path("post_message_feedback/<uuid:session_id>", views.post_message_feedback)
 ]
