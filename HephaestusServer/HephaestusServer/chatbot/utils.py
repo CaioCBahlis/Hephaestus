@@ -20,17 +20,16 @@ def _parse_to_gemini(raw_messages: list[dict[str, Any]]) -> list[types.ContentOr
     
     return parsed
 
-def get_gemini_response(user_id, user_data: dict[str, Any], conversation_history: list[dict[str, Any]]) -> str:
-    tool_map = tools.build_tools(user_id)  
+def get_gemini_response(user_id, user_data: dict[str, Any], conversation_history: list[dict[str, Any]]) -> str | dict:
+    tool_map = tools.build_tools(user_id)
 
     client, config = gemini_config.generate_chatbot_model(
         user_data=user_data,
-        tool_map=tool_map,  
+        tool_map=tool_map,
     )
 
-
     history_for_chat = _parse_to_gemini(conversation_history[:-1])
-    
+
     chat = client.chats.create(
         model=gemini_config.GEMINI_MODEL,
         config=config,
@@ -41,28 +40,30 @@ def get_gemini_response(user_id, user_data: dict[str, Any], conversation_history
 
     for _ in range(5):
         response = chat.send_message(current_input)
-        
+
         if not response.function_calls:
             return response.text
 
         tool_responses = []
+
         for call in response.function_calls:
             tool = tool_map[call.name]
             result = tool.func(**call.args)
 
-        if call.name == "get_prediction_chart":
-            return {"type": "chart", "data": result}
+            if call.name in {"get_prediction_chart", "get_graph_data"}:
+                return {"type": "chart", "data": result}
 
-        tool_responses.append(
-            types.Part.from_function_response(
-                name=call.name,
-                response={"result": result}
+            tool_responses.append(
+                types.Part.from_function_response(
+                    name=call.name,
+                    response={"result": result}
+                )
             )
-        )
 
         current_input = tool_responses
 
     raise Exception("Model looped too many times")
+
 
 def ParseBankStatement(FilePath: str, user_id):
 

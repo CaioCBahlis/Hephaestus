@@ -100,52 +100,57 @@ export default function Chatbot(){
     return <Navigate to="/login" replace />
     }
 
-    async function handleSubmit(NewMessage: MessageProps){
-        
+    async function handleSubmit(NewMessage: MessageProps) {
         const ThinkingMessage: MessageProps = {
             Text: "",
             UserMessage: false,
             MessageType: "Thinking"
-        }
-        
+        };
 
-        setMessages(x => [...x, NewMessage, ThinkingMessage])
-        
+        setMessages(prev => [...prev, NewMessage, ThinkingMessage]);
+
         let reply;
-        if (NewMessage.MessageType === "File"){
-            reply = await ChatbotClient.PostUserFiles({File: File!, UserMessage: true}, sessionId!.toString())
-        }else{
-            reply = await ChatbotClient.PostUserQuery({ChatContext: [...Messages, NewMessage]}, sessionId!.toString()) //React Will only update messages next tick, do it manually instead
+        if (NewMessage.MessageType === "File") {
+            reply = await ChatbotClient.PostUserFiles(
+                { File: File!, UserMessage: true },
+                sessionId!.toString()
+            );
+        } else {
+            reply = await ChatbotClient.PostUserQuery(
+                { ChatContext: [...Messages, NewMessage] },
+                sessionId!.toString()
+            );
         }
 
         let BotResponse: MessageProps = {
             Text: "",
             UserMessage: false,
             MessageType: "Text"
-        }   
-
+        };
 
         if (!reply.ok) {
-            BotResponse.Text = "An error occurred. Please try again later."
+            BotResponse.Text = "An error occurred. Please try again later.";
         } else {
-            const replyData = reply.data["reply"]
-            
+            const replyData = reply.data["reply"];
+
             if (replyData?.type === "chart") {
-                BotResponse.Text = JSON.stringify(replyData.data)
-                BotResponse.MessageType = "Graph"
+                BotResponse.Text = JSON.stringify(replyData.data);
+                BotResponse.MessageType = "Graph";
             } else {
-                BotResponse.Text = replyData
+                BotResponse.Text =
+                    typeof replyData === "string"
+                        ? replyData
+                        : JSON.stringify(replyData);
             }
         }
-        
-        setMessages(_ => [...Messages, NewMessage, BotResponse])
 
-        setNonce(Date.now())
-        setQuery("")
-        SetFiles(null)
+        setMessages(prev => [...prev.slice(0, -1), BotResponse]);
+
+        setNonce(Date.now());
+        setQuery("");
+        SetFiles(null);
     }
 
-   
     return (
 
         <div className="w-screen h-screen bg-[#1B100E] flex flex-col justify-around">
