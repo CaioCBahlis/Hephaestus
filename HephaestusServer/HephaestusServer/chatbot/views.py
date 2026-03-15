@@ -184,3 +184,25 @@ def get_session_context(request, session_id):
 
 
     return JsonResponse({"messages": UserConversations.messages}, status=200)
+
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def post_message_feedback(request, session_id):
+    user_id = request.user.id
+
+    try:
+        data = json.loads(request.body.decode("utf-8"))
+        conversation_history = data.get("ChatContext")
+
+        conv_session = Conversations.objects.get(id=session_id)
+        conv_session.messages = conversation_history
+        conv_session.save()
+
+    except Exception as e:
+        error_message = {"error": f"Internal server error: {e}"}
+        print(f"Error sending message, got: {error_message}")
+        return JsonResponse(error_message, status=500)
+
+    return JsonResponse({"success": True}, status=200)
