@@ -18,6 +18,15 @@ def get_date_range_wrapper(user_id, month: int, year: int) -> dict:
         "description": f"{start.strftime('%B %Y')}",
     }
 
+def get_year_range_wrapper(user_id, year: int) -> dict:
+    """Returns the Unix timestamp range for a full year."""
+    start = datetime(year, 1, 1, tzinfo=timezone.utc)
+    end = datetime(year, 12, 31, 23, 59, 59, tzinfo=timezone.utc)
+    return {
+        "start_timestamp": int(start.timestamp()),
+        "end_timestamp": int(end.timestamp()),
+        "description": f"{year}"
+    }
 
 def _to_int_ts(x: Union[int, str]) -> int:
     if isinstance(x, int):
@@ -301,6 +310,23 @@ get_graph_data_tool = models.ChatbotTool(
     ],
 )
 
+get_year_range_tool = models.ChatbotTool(
+    name="get_year_range",
+    description="Converts a full year into Unix timestamps. Use this when the user asks about an entire year like '2025' or 'all of 2025'.",
+    params=[
+        models.ToolParam(name="year", data_type=int, description="Four-digit year e.g. 2025", is_required=True),
+    ],
+    func=None,
+    return_type=dict,
+    return_description="dict with start_timestamp and end_timestamp as Unix integers for the full year",
+    constraints="year must be 4 digits.",
+    usage_examples=[
+        "User asks about '2025' → call with year=2025",
+        "User asks about 'all of 2026' → call with year=2026",
+        "User asks 'show me a graph of my spending in 2025' → call with year=2025",
+    ]
+)
+
 
 def build_tools(user_id):
     def make_spend_summary(start_date: int, end_date: int) -> dict:
@@ -329,11 +355,18 @@ def build_tools(user_id):
 
     def make_date_range(month: int, year: int) -> dict:
         return get_date_range_wrapper(user_id, month, year)
+    
+    def make_year_range(year: int) -> dict:
+        return get_year_range_wrapper(user_id, year)
 
+    make_year_range.__name__ = "get_year_range"
     make_spend_summary.__name__ = "get_spend_summary"
     make_prediction.__name__ = "get_prediction"
     make_graph_data.__name__ = "get_graph_data"
     make_date_range.__name__ = "get_date_range"
+
+    year_range = get_year_range_tool.model_copy(deep=True)
+    year_range.func = make_year_range
 
     spend = get_spend_summary_tool.model_copy(deep=True)
     spend.func = make_spend_summary
@@ -352,12 +385,13 @@ def build_tools(user_id):
         "get_prediction": pred,
         "get_graph_data": graph,
         "get_date_range": date_range,
+        "get_year_range": year_range,
     }
-
 
 CHATBOT_TOOLS = {
     "get_spend_summary": get_spend_summary_tool,
     "get_prediction": get_prediction_tool,
     "get_graph_data": get_graph_data_tool,
     "get_date_range": get_date_range_tool,
+    "get_year_range": get_year_range_tool,
 }
